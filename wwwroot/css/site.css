@@ -1,5 +1,8 @@
 html {
   font-size: 14px;
+  background-color: white;
+  color: #121212;
+  font-family: 'Poppins', sans-serif;
 }
 
 @media (min-width: 768px) {
@@ -8,15 +11,119 @@ html {
   }
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
-}
-
 body {
+  background-color: white;
+  color: #121212;
   margin-bottom: 60px;
+  font-family: 'Poppins', sans-serif;
+}
+
+a {
+  color: #bb86fc;
+}
+
+a:hover {
+  color: #3700b3;
+}
+
+.btn {
+  background-color: #bb86fc;
+  color: #121212;
+  font-family: 'Poppins', sans-serif;
+  padding: 8px 100px;
+  width: auto;
+  border: none;
+}
+
+.btn:hover {
+  background-color: #3700b3;
+  color: #121212;
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem rgba(18, 18, 18, 0.5), 0 0 0 0.25rem rgba(245, 255, 0, 0.5), 0 0 0 0.35rem rgba(186, 255, 201, 0.5);
+}
+
+.navbar {
+  background-color: #1f1f1f;
+}
+
+.nav-link {
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.nav-link:hover {
+  color: #bb86fc;
+}
+
+.footer {
+  background-color: #1f1f1f;
+  color: #e0e0e0;
+  font-family: 'Poppins', sans-serif;
+}
+
+.gradient-custom-2 {
+  /* fallback for old browsers */
+  background: #f5ff00;
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, #f5ff00, #baffc9);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #f5ff00, #baffc9);
+}
+
+@media (min-width: 768px) {
+  .gradient-form {
+    height: 100vh !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .gradient-custom-2 {
+    border-top-right-radius: .3rem;
+    border-bottom-right-radius: .3rem;
+  }
+}
+
+.form-control {
+  background-color: white;
+  color: #121212;
+  border: 1px solid #444444;
+  font-family: 'Poppins', sans-serif;
+  border-image: linear-gradient(to right, #f5ff00, #baffc9) 1;
+}
+
+.form-control::placeholder {
+  color: #888888;
+}
+
+.form-control:focus {
+  background-color: white; 
+  color: #121212;
+  border-color: transparent; 
+  box-shadow: 0 0 0 0.2rem rgba(245, 255, 0, 0.5), 0 0 0 0.3rem rgba(186, 255, 201, 0.5);
+}
+
+.form-check-input {
+  background-color: #333333;
+  border-color: #444444;
+}
+
+.form-check-input:checked {
+  background-color: #bb86fc;
+  border-color: #bb86fc;
+}
+
+.card {
+  background-color: white; 
+  color: #121212;
+  font-family: 'Poppins', sans-serif;
+}
+
+.text-black {
+  color: #121212 !important;
+}
+
+.text-white {
+  color: #121212 !important;
 }

@@ -47,6 +47,20 @@ namespace Limoncello.Models
                         PasswordHash = hasher.HashPassword(null, "User1!")
                     }
                 );
+                // ASOCIEREA USER-ROLE
+                context.UserRoles.AddRange(
+                    new IdentityUserRole<string>
+                    {
+
+                        RoleId = "2c5e174e-3b0e-446f-86af-483d56fd7212",
+                        UserId = "8e445865-a24d-4543-a6c6-9443d048cdb2"
+                    },
+                    new IdentityUserRole<string>
+                    {
+                        RoleId = "2c5e174e-3b0e-446f-86af-483d56fd7210",
+                        UserId = "8e445865-a24d-4543-a6c6-9443d048cdb0"
+                    }
+                );
                 context.SaveChanges();
             }
         }

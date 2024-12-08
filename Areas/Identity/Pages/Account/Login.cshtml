@@ -1,0 +1,69 @@
+﻿@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Log in";
+}
+
+
+<div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-xl-10">
+            <div class="card rounded-3 text-black">
+                <div class="row g-0">
+                    <div class="col-lg-6">
+                        <div class="card-body p-md-5 mx-md-4">
+
+                            <div class="text-center">
+                                <img src="https://cdn.discordapp.com/attachments/1305110593279361025/1315362560718929980/Logo.png?ex=67572258&is=6755d0d8&hm=7b988f8abe433dfc5ba94ed1827ffa1857e84f6e0864ea2bc8774aca00acd251&"
+                                        style="width: 220px;" alt="logo">
+                                <h4 class="mt-1 mb-5 pb-1">Drinking or workin'?</h4>
+                            </div>
+
+                            <form id="account" method="post">
+                                <p>Please login to your account</p>
+                                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+                                <div data-mdb-input-init class="form-outline mb-4">
+                                    <input asp-for="Input.Email" id="form2Example11" class="form-control" autocomplete="username" aria-required="true" placeholder="Email address" />
+                                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                </div>
+
+                                <div data-mdb-input-init class="form-outline mb-4">
+                                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Password" />
+                                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                </div>
+
+                                <div class="text-center pt-1 mb-5 pb-1">
+                                    <button id="login-submit" type="submit" class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3">Log in</button>
+                                    <br />
+                                    <a class="text-muted" href="#!">Forgot password?</a>
+                                </div>
+
+                                <div class="text-center pt-1 mb-5 pb-1">
+                                    <p class="mb-0 me-2">Don't have an account?</p>
+                                    <br />
+                                    <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" class="btn btn-primary btn-block fa-lg gradient-custom-2 mb-3">Create new</a>
+                                </div>
+                            </form>
+
+                        </div>
+                    </div>
+                    <div class="col-lg-6 d-flex align-items-center gradient-custom-2">
+                        <div class="text-white px-3 py-4 p-md-5 mx-md-4">
+                            <h4 class="mb-4">We are more than just a company</h4>
+                            <p class="small mb-0">
+                                Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
