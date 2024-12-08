@@ -1,6 +1,9 @@
-﻿namespace Limoncello.Models
+﻿using Microsoft.AspNetCore.Identity;
+
+namespace Limoncello.Models
 {
-    public class ApplicationUser
+    public class ApplicationUser : IdentityUser
     {
+
     }
 }
