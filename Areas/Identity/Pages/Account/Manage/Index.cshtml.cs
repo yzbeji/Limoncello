@@ -66,6 +66,7 @@ namespace Limoncello.Areas.Identity.Pages.Account.Manage
 
             [Display(Name = "Profile Picture")]
             public IFormFile ProfilePicture { get; set; }
+            public bool? WasPfpUpdated { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -138,7 +139,7 @@ namespace Limoncello.Areas.Identity.Pages.Account.Manage
                     user.ProfilePicture = stream.ToArray();
                 }
             }
-            else
+            else if (Input.WasPfpUpdated == true)
             {
                 user.ProfilePicture = null;
             }
