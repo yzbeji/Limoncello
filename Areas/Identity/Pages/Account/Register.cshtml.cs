@@ -71,6 +71,17 @@ namespace Limoncello.Areas.Identity.Pages.Account
         /// </summary>
         public class InputModel
         {
+            [Required]
+            [Display(Name = "First Name")]
+            public string FirstName { get; set; }
+
+            [Required]
+            [Display(Name = "Last Name")]
+            public string LastName { get; set; }
+
+            [Display(Name = "Profile Picture")]
+            public IFormFile ProfilePicture { get; set; }
+
             /// <summary>
             ///     This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
             ///     directly from your code. This API may change or be removed in future releases.
@@ -117,11 +128,29 @@ namespace Limoncello.Areas.Identity.Pages.Account
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+
+                // ApplicationUser attributes
+                user.FirstName = Input.FirstName;
+                user.LastName = Input.LastName;
+                user.ProfilePicture = null;
+
+                if (Input.ProfilePicture != null)
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        await Input.ProfilePicture.CopyToAsync(stream);
+                        user.ProfilePicture = stream.ToArray();
+                    }
+                }
+
                 var result = await _userManager.CreateAsync(user, Input.Password);
 
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
+
+                    // Assign the "User" role to the new user
+                    await _userManager.AddToRoleAsync(user, "User");
 
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
