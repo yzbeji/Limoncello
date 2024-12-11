@@ -11,7 +11,8 @@
     <div class="col-md-8">
         <form id="profile-form" method="post" enctype="multipart/form-data">
             <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-            <input asp-for="Input.ProfilePicture" class="form-control" type="file" style="display: none;" id="profile-picture-input" />
+            <input asp-for="Input.ProfilePicture" class="form-control" type="file" style="display: none;" id="profile-picture-input" value="@Model.ProfilePicture"/>
+            <input asp-for="Input.WasPfpUpdated" type="hidden" value="false" id="was-pfp-updated"/>
             <span asp-validation-for="Input.ProfilePicture" class="text-danger"></span>
 
             <div class="form-floating mb-3">
@@ -82,6 +83,7 @@
             var reader = new FileReader();
             reader.onload = function(e) {
                 document.getElementById('profile-picture').src = e.target.result;
+                document.getElementById('current-profile-picture').value = e.target.result.split(',')[1]; // Update hidden input with new image data
             };
             reader.readAsDataURL(event.target.files[0]);
         });
@@ -89,6 +91,7 @@
         document.getElementById('remove-profile-picture').addEventListener('click', function() {
             document.getElementById('profile-picture').src = '/images/pfp_placeholder.png';
             document.getElementById('profile-picture-input').value = '';
+            document.getElementById('was-pfp-updated').value = "true";
         });
     </script>
 }
