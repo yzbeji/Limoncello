@@ -1,11 +1,6 @@
 ﻿@page
 @model LoginModel
 
-@{
-    ViewData["Title"] = "Log in";
-}
-
-
 <div class="container py-5 h-100">
     <div class="row d-flex justify-content-center align-items-center h-100">
         <div class="col-xl-10">
@@ -20,7 +15,6 @@
                             </div>
 
                             <form id="account" method="post">
-                                <p>Please login to your account</p>
                                 <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
 
                                 <div data-mdb-input-init class="form-outline mb-4">
