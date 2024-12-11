@@ -1,18 +1,32 @@
 using System.Diagnostics;
+using Limoncello.Data;
 using Limoncello.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Limoncello.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger)
+        private readonly ApplicationDbContext db;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly RoleManager<IdentityRole> _roleManager;
+        public HomeController(
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager,
+            RoleManager<IdentityRole> roleManager
+        )
         {
-            _logger = logger;
+            db = context;
+            _userManager = userManager;
+            _roleManager = roleManager;
         }
 
+        private readonly ILogger<HomeController> _logger;
+
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
             return View();

@@ -1,0 +1,61 @@
+﻿@page
+@model RegisterModel
+
+<div class="container py-5 h-100">
+    <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-xl-10">
+            <div class="card rounded-3 text-black">
+                <div class="row g-0">
+                    <div class="col-lg-6">
+                        <div class="card-body p-md-5 mx-md-4">
+
+                            <div class="text-center">
+                                <img src="https://cdn.discordapp.com/attachments/1305110593279361025/1315362560718929980/Logo.png?ex=67572258&is=6755d0d8&hm=7b988f8abe433dfc5ba94ed1827ffa1857e84f6e0864ea2bc8774aca00acd251&"
+                                        style="width: 220px;" alt="logo">
+                                <h4 class="mt-1 mb-5 pb-1">Drinking or workin'?</h4>
+                            </div>
+
+                            <form id="registerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post" enctype="multipart/form-data">
+                                <h4 class="text-center">Create a new account</h4>
+                                <hr />
+                                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.FirstName" class="form-control" placeholder="First Name" />
+                                    <label asp-for="Input.FirstName">First Name</label>
+                                    <span asp-validation-for="Input.FirstName" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.LastName" class="form-control" placeholder="Last Name" />
+                                    <label asp-for="Input.LastName">Last Name</label>
+                                    <span asp-validation-for="Input.LastName" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                                    <label asp-for="Input.Email">Email</label>
+                                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                                    <label asp-for="Input.Password">Password</label>
+                                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
+                                    <label asp-for="Input.ConfirmPassword">Confirm Password</label>
+                                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                                </div>
+                                <button id="registerSubmit" type="submit" class="btn btn-primary w-100 fa-lg gradient-custom-2 mb-3">Register</button>
+                            </form>
+                        </div>
+                    </div>
+                    <partial name="AuthFormSideBox" model="Model" />
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
