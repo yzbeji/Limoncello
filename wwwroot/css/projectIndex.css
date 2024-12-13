@@ -1,0 +1,9 @@
+﻿.tall-card {
+    min-height: 100px;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    user-select: none;
+}

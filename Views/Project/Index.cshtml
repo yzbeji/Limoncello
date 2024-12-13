@@ -1,0 +1,28 @@
+﻿<head>
+    <link rel="stylesheet" href="~/css/projectIndex.css" />
+</head>
+
+<div class="mt-3">
+    <h1>Your projects</h1>
+</div>
+<hr />
+
+<div class="container mt-3">
+    <div class="row">
+        @if (ViewBag.IsEmpty){
+            <h4>No projects to display</h4>
+        }
+        @foreach(var project in ViewBag.Projects)
+        {
+            <div class="col-md-3 mb-3">
+                <a href="@Url.Action("Show", "Project", new {id = project.Id})" class="card-link">
+                    <div class="card tall-card">
+                        <div class="card-body">
+                            <h5 class="card-title">@project.Name</h5>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
