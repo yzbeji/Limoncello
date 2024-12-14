@@ -23,34 +23,41 @@ a {
 }
 
 a:hover {
-  color: black;
+  color: #3700b3;  
 }
 
 .btn {
-  background-color: #bb86fc;
-  color: #121212;
+  background-color: #bb86fc; 
+  color: #121212;  
   font-family: 'Poppins', sans-serif;
   padding: 8px 100px;
   width: auto;
+  border: 1px;
   border-color: black;
 }
 
 .btn:hover {
-  background-color: #3700b3;
-  color: black;
+  background-color: #3700b3; 
+  color: white;  
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem rgba(18, 18, 18, 0.5), 0 0 0 0.25rem rgba(245, 255, 0, 0.5), 0 0 0 0.35rem rgba(186, 255, 201, 0.5);
+  box-shadow: 0 0 0 0.1rem rgba(18, 18, 18, 0.5), 0 0 0 0.25rem rgba(55, 0, 179, 0.5), 0 0 0 0.35rem rgba(186, 255, 201, 0.5); /* Match the focus box-shadow with dark purple */
 }
+
 
 .navbar {
   background-color: #1f1f1f;
 }
 
 .nav-link {
-  color: #e0e0e0;
+  color: #e0e0e0; 
   font-family: 'Poppins', sans-serif;
+  text-decoration: none; 
+  display: inline-block; 
+  padding: 8px 16px; 
+  border: none; 
+  background-color: transparent; 
 }
 
 .nav-link:hover {
