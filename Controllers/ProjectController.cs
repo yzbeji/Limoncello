@@ -2,6 +2,7 @@
 using Limoncello.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
 namespace Limoncello.Controllers
@@ -48,7 +49,7 @@ namespace Limoncello.Controllers
         {
             // TODO check if the user has access to this project
             string userId = _userManager.GetUserId(User);
-            var project = db.Projects
+            var project = db.Projects.Include(p => p.TaskColumns).ThenInclude(tc => tc.ProjectTasks)
                           .Where(p => p.Id == id)
                           .FirstOrDefault();
             var projectUsers = db.UserProjects
