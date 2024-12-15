@@ -13,19 +13,14 @@
 {
     <div class="alert @TempData["messageType"] alert-dismissible fade show" role="alert">
         @TempData["message"]
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <i class="fas fa-times"></i>
-        </button>
     </div>
-
     <script>
-        // Automatically fade out alert after 5 seconds
         setTimeout(function () {
             var alert = document.querySelector('.alert');
             if (alert) {
                 alert.classList.add('fade-out');
             }
-        }, 5000); /
+        }, 1000); 
     </script>
 
 }
@@ -52,18 +47,8 @@
                             <input asp-for="Name" class="form-control" placeholder="Your fav' drink" />
                         </div>
                         <br />
-                        // TO DO: choose from a background
-                        <div class="form-group">
-                            <label asp-for="ProjectPicture" class="form-label">Picture with your love</label>
-                            <br />
-                            <input asp-for="ProjectPicture" type="file" class="form-control" accept="image/*" />
-                            <small class="form-text text-muted">Pick an image to use as your board's background.</small>
-                        </div>
-
-                        <br />
                         <button style="align-self:center" type="submit" class="btn btn-primary">Submit</button>
                     </form>
-
                 </div>
             </div>
         </div>
@@ -92,7 +77,7 @@
         }
         <script>
             const gradients = [
-                "linear-gradient(to right, #FFFF00, #FFD700)", 
+                "linear-gradient(to right, #f5ff00, #baffc9)"
             ];
             function getRandomGradient() {
                 const randomIndex = Math.floor(Math.random() * gradients.length);
