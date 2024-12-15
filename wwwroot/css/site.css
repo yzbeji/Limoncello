@@ -27,24 +27,25 @@ a:hover {
 }
 
 .btn {
-  background-color: #bb86fc; 
-  color: #121212;  
-  font-family: 'Poppins', sans-serif;
-  padding: 8px 100px;
-  width: auto;
-  border: 1px;
-  border-color: black;
+    background-color: #F0F0F0;
+    color: #121212;
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    padding: 8px 100px;
+    width: auto;
+    border: 1px;
+    border-color: black;
+}
+
+.btn:focus {
+    outline: none;
+    box-shadow: none;
+    color: black;
 }
 
 .btn:hover {
-  background-color: #3700b3; 
-  color: white;  
+    color: black;
 }
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem rgba(18, 18, 18, 0.5), 0 0 0 0.25rem rgba(55, 0, 179, 0.5), 0 0 0 0.35rem rgba(186, 255, 201, 0.5); /* Match the focus box-shadow with dark purple */
-}
-
 
 .navbar {
   background-color: #1f1f1f;
@@ -79,6 +80,15 @@ a:hover {
   background: linear-gradient(to right, #f5ff00, #baffc9);
 }
 
+.button-gradient {
+    /* fallback for old browsers */
+    background: #f5ff00;
+    /* Chrome 10-25, Safari 5.1-6 */
+    background: -webkit-linear-gradient(to right, #F2F2F2, #dbdbdb);
+    /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+    background: linear-gradient(to right, #F2F2F2, #dbdbdb);
+}
+
 @media (min-width: 768px) {
   .gradient-form {
     height: 100vh !important;
@@ -93,11 +103,11 @@ a:hover {
 }
 
 .form-control {
-  background-color: white;
-  color: #121212;
-  border: 1px solid #444444;
-  font-family: 'Poppins', sans-serif;
-  border-image: linear-gradient(to right, #f5ff00, #baffc9) 1;
+    background-color: white;
+    color: #121212;
+    border: 1px solid #dbdbdb;
+    font-family: 'Poppins', sans-serif;
+    border-image: linear-gradient(to right, #F2F2F2, #dbdbdb) 1;
 }
 
 .form-control::placeholder {
@@ -105,10 +115,10 @@ a:hover {
 }
 
 .form-control:focus {
-  background-color: white; 
-  color: #121212;
-  border-color: transparent; 
-  box-shadow: 0 0 0 0.2rem rgba(245, 255, 0, 0.5), 0 0 0 0.3rem rgba(186, 255, 201, 0.5);
+    background-color: white;
+    color: #121212;
+    border-color: transparent;
+    box-shadow: 0 0 0 0.2rem rgba(128, 128, 128, 0.5), 0 0 0 0.3rem rgba(192, 192, 192, 0.5);
 }
 
 .form-check-input {
