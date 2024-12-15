@@ -10,15 +10,24 @@ namespace Limoncello.Data.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.AlterColumn<string>(
+                name: "Name",
+                table: "Projects",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "",
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)",
+                oldNullable: true);
+
             migrationBuilder.AddColumn<string>(
                 name: "OrganizerId",
                 table: "Projects",
                 type: "nvarchar(max)",
-                nullable: false,
-                defaultValue: "");
+                nullable: true);
 
             migrationBuilder.CreateTable(
-                name: "TaskColumn",
+                name: "TaskColumns",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -28,9 +37,9 @@ namespace Limoncello.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_TaskColumn", x => x.Id);
+                    table.PrimaryKey("PK_TaskColumns", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_TaskColumn_Projects_ProjectId",
+                        name: "FK_TaskColumns_Projects_ProjectId",
                         column: x => x.ProjectId,
                         principalTable: "Projects",
                         principalColumn: "Id",
@@ -38,7 +47,7 @@ namespace Limoncello.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ProjectTask",
+                name: "ProjectTasks",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -49,23 +58,23 @@ namespace Limoncello.Data.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ProjectTask", x => x.Id);
+                    table.PrimaryKey("PK_ProjectTasks", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ProjectTask_TaskColumn_TaskColumnId",
+                        name: "FK_ProjectTasks_TaskColumns_TaskColumnId",
                         column: x => x.TaskColumnId,
-                        principalTable: "TaskColumn",
+                        principalTable: "TaskColumns",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ProjectTask_TaskColumnId",
-                table: "ProjectTask",
+                name: "IX_ProjectTasks_TaskColumnId",
+                table: "ProjectTasks",
                 column: "TaskColumnId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_TaskColumn_ProjectId",
-                table: "TaskColumn",
+                name: "IX_TaskColumns_ProjectId",
+                table: "TaskColumns",
                 column: "ProjectId");
         }
 
@@ -73,14 +82,22 @@ namespace Limoncello.Data.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ProjectTask");
+                name: "ProjectTasks");
 
             migrationBuilder.DropTable(
-                name: "TaskColumn");
+                name: "TaskColumns");
 
             migrationBuilder.DropColumn(
                 name: "OrganizerId",
                 table: "Projects");
+
+            migrationBuilder.AlterColumn<string>(
+                name: "Name",
+                table: "Projects",
+                type: "nvarchar(max)",
+                nullable: true,
+                oldClrType: typeof(string),
+                oldType: "nvarchar(max)");
         }
     }
 }

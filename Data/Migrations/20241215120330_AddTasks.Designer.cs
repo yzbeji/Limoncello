@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Limoncello.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241214102336_AddTasks")]
+    [Migration("20241215120330_AddTasks")]
     partial class AddTasks
     {
         /// <inheritdoc />
@@ -119,10 +119,10 @@ namespace Limoncello.Data.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("Name")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("OrganizerId")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("ProjectPicture")
@@ -154,7 +154,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("TaskColumnId");
 
-                    b.ToTable("ProjectTask");
+                    b.ToTable("ProjectTasks");
                 });
 
             modelBuilder.Entity("Limoncello.Models.TaskColumn", b =>
@@ -175,7 +175,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("TaskColumn");
+                    b.ToTable("TaskColumns");
                 });
 
             modelBuilder.Entity("Limoncello.Models.UserProject", b =>
