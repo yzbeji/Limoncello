@@ -3,6 +3,7 @@ using Limoncello.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Build.Execution;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 
@@ -31,7 +32,7 @@ namespace Limoncello.Controllers
         public IActionResult Index()
         {
             string userId = _userManager.GetUserId(User);
-            var userProjects = db.UserProjects 
+            var userProjects = db.UserProjects
                                .Where(up => up.UserId == userId)
                                .Select(up => up.Project)
                                .ToList();
@@ -70,24 +71,52 @@ namespace Limoncello.Controllers
             }
         }
 
+        public IActionResult Settings(int? id)
+        {
+            var project = db.Projects
+                            .Include(p => p.UserProjects)
+                            .ThenInclude(up => up.User)
+                            .FirstOrDefault(p => p.Id == id);
+
+            if (project == null)
+            {
+                TempData["message"] = "Project not found";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            string userId = _userManager.GetUserId(User);
+
+            if (project.OrganizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = id });
+            }
+            else
+            {
+                return View(project);
+            }
+        }
+
         [Authorize(Roles = "User,Admin")]
         public IActionResult New(Project project)
         {
             project.OrganizerId = _userManager.GetUserId(User);
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 db.Projects.Add(project);
                 db.SaveChanges();
                 UserProject up = new UserProject
                 {
                     UserId = project.OrganizerId,
-                    ProjectId = project.Id 
+                    ProjectId = project.Id
                 };
                 db.UserProjects.Add(up);
                 db.SaveChanges();
                 TempData["message"] = "Board created succesfully";
                 TempData["messageType"] = "alert-success";
-                return RedirectToAction("Index");   
+                return RedirectToAction("Index");
             }
             else
             {
@@ -95,6 +124,113 @@ namespace Limoncello.Controllers
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Index");
             }
+        }
+
+        [HttpPost]
+        public IActionResult Edit(Project reqProject)
+        {
+            var projectOrganizer = db.Projects.Where(p => p.Id == reqProject.Id).Select(p => p.OrganizerId).FirstOrDefault();
+            if (_userManager.GetUserId(User) != projectOrganizer)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = reqProject.Id });
+            }
+
+            if (ModelState.IsValid)
+            {
+                var project = db.Projects.Find(reqProject.Id);
+                project.Name = reqProject.Name;
+                db.SaveChanges();
+                TempData["message"] = "Board name updated";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Settings", new { id = reqProject.Id });
+            }
+            else
+            {
+                TempData["message"] = "You must name the board!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = reqProject.Id});
+            }   
+        }
+
+        [HttpPost]
+        public IActionResult AddMember(int projectId, string userEmail)
+        {
+            if (userEmail == null)
+            {
+                TempData["message"] = "Please specify an email!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+
+            var user = _userManager.FindByEmailAsync(userEmail).Result;
+
+            if (user == null)
+            {
+                TempData["message"] = "User not found";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+
+            var project = db.Projects.Include(p => p.UserProjects).FirstOrDefault(p => p.Id == projectId);
+
+            if (project == null)
+            {
+                TempData["message"] = "Project not found";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            if (project.UserProjects.Any(up => up.UserId == user.Id))
+            {
+                TempData["message"] = "User is already a member of this project";
+                TempData["messageType"] = "alert-warning";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+
+            var userProject = new UserProject
+            {
+                UserId = user.Id,
+                ProjectId = project.Id
+            };
+
+            db.UserProjects.Add(userProject);
+            db.SaveChanges();
+
+            TempData["message"] = "User added to project";
+            TempData["messageType"] = "alert-success";
+            return View("Show", new { id = projectId });
+        }
+
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult Delete(int id)
+        {
+            var project = db.Projects.Include(p => p.UserProjects).FirstOrDefault(p => p.Id == id);
+
+            if (project == null)
+            {
+                TempData["message"] = "Project not found";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            string userId = _userManager.GetUserId(User);
+
+            if (project.OrganizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = id });
+            }
+
+            db.Projects.Remove(project);
+            db.SaveChanges();
+
+            TempData["message"] = "Project deleted successfully";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Index");
         }
     }
 }
