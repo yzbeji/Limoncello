@@ -3,7 +3,12 @@
 <partial name="TempMessagePartial" model="Model" />
 
 <div class="mt-3">
-    <h1>Project Settings</h1>
+    <h1>
+        <a asp-action="Show" asp-controller="Project" asp-route-id="@Model.Id" class="no-underline-no-colour">
+            ←
+        </a>
+        Project Settings
+    </h1>
     <hr />
 
     @* Board name *@
@@ -56,16 +61,41 @@
             var base64String = userProject.User.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
             <div class="form-group m-3 dropdown">
                 <img id="profile-picture-@userProject.UserId"
-                     class="dropdown-toggle"
-                     src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
-                     alt="Profile Picture"
-                     style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
-                     data-bs-toggle="dropdown"
-                     aria-expanded="false" />
+                    class="dropdown-toggle"
+                    src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                    alt="Profile Picture"
+                    style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false" />
+                @if (userProject.UserId == Model.OrganizerId)
+                {
+                    <img src="/images/crown.png" class="crown-icon" alt="Organizer" />
+                }
                 <ul class="dropdown-menu">
-                    <li><span class="dropdown-item">@user.FirstName @user.LastName</span></li>
-                    <li><a class="dropdown-item" href="#">Make organizer</a></li>
-                    <li><a class="dropdown-item" href="#">Remove from board</a></li>
+                    <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
+                    @if (userProject.UserId != ViewBag.UserId)
+                    {
+                        <li>
+                            <form id="changeOrgForm_@userProject.UserId" asp-action="MakeOrganizer" asp-controller="Project">
+                                <input type="hidden" name="projectId" value="@Model.Id" />
+                                <input type="hidden" name="userId" value="@userProject.UserId" />
+                                <button type="button"
+                                    class="dropdown-item"
+                                    data-toggle="modal"
+                                    data-target="#changeOrgModal"
+                                    onclick="setPendingOrgIdChange('@userProject.UserId')">
+                                        Make Organizer
+                                </button>
+                            </form>
+                        </li>
+                        <li>
+                            <form method="post" asp-action="RemoveMember" asp-controller="Project">
+                                <input type="hidden" name="projectId" value="@Model.Id" />
+                                <input type="hidden" name="userId" value="@userProject.UserId" />
+                                <button class="dropdown-item">Remove from board</button>
+                            </form>
+                        </li>
+                    }
                 </ul>
             </div>
         }
@@ -103,7 +133,34 @@
     </div>
 </div>
 
+@* Change orgnaizer confirmation popup *@
+<div class="modal fade" id="changeOrgModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Change Organizer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to change the organizer?
+                <br />
+                You will lose the role!
+            </div>
+            <div class="modal-footer flex-column">
+                <button type="button" class="btn btn-danger" onclick="submitChangeOrgForm()">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    function setPendingOrgIdChange(userId){
+        localStorage.setItem("pendingOrgIdChange", userId);
+    }
+
     function toggleMenu(menuId) {
         var menu = document.getElementById(menuId);
         if (menu.style.display === "none" || menu.style.display === "") {
@@ -117,35 +174,8 @@
         document.getElementById("deleteForm").submit();
     }
 
-    // Close the menu if the user clicks outside of it
-    window.onclick = function(event) {
-        if (!event.target.matches('img[id^="profile-picture-"]')) {
-            var dropdowns = document.getElementsByClassName("dropdown-menu");
-            for (var i = 0; i < dropdowns.length; i++) {
-                var openDropdown = dropdowns[i];
-                if (openDropdown.style.display === "block") {
-                    openDropdown.style.display = "none";
-                }
-            }
-        }
+    function submitChangeOrgForm(){
+		var pendingOrgId = localStorage.getItem("pendingOrgIdChange");
+        document.getElementById("changeOrgForm_" + pendingOrgId).submit();
     }
 </script>
-
-@* TODO: maybe change the styling *@
-<style>
-    .dropdown-menu {
-        position: absolute;
-        background-color: white;
-        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-        z-index: 1;
-    }
-    .dropdown-item {
-        padding: 8px 16px;
-        display: block;
-        color: black;
-        text-decoration: none;
-    }
-    .dropdown-item:hover {
-        background-color: #ddd;
-    }
-</style>

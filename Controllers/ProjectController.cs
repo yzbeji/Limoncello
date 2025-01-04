@@ -61,6 +61,8 @@ namespace Limoncello.Controllers
                                .Select(up => up.UserId)
                                .ToList();
 
+            ViewBag.UserId = userId;
+
             if (projectUsers.Contains(userId))
             {
                 return View(project);
@@ -86,6 +88,12 @@ namespace Limoncello.Controllers
             }
 
             string userId = _userManager.GetUserId(User);
+            ViewBag.UserId = userId;
+
+            // display the organizer first
+            project.UserProjects = project.UserProjects
+                                            .OrderBy(up => up.UserId != project.OrganizerId)
+                                            .ToList();
 
             if (project.OrganizerId != userId)
             {
@@ -200,7 +208,36 @@ namespace Limoncello.Controllers
 
             TempData["message"] = "User added to project";
             TempData["messageType"] = "alert-success";
-            return View("Show", new { id = projectId });
+            return RedirectToAction("Settings", new { id = projectId });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveMember(int projectId, string userId)
+        {
+            var userProject = db.UserProjects
+                                .Where(up => up.ProjectId == projectId && up.UserId == userId)
+                                .FirstOrDefault();
+
+            if (userProject == null)
+            {
+                TempData["message"] = "Something went wrong!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+
+            if (userId == _userManager.GetUserId(User))
+            {
+                TempData["message"] = "You can't remove yourself!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+
+            db.UserProjects.Remove(userProject);
+            db.SaveChanges();
+
+            TempData["message"] = "User removed successfully!";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Settings", new { id = projectId });
         }
 
         [HttpPost]
@@ -231,6 +268,28 @@ namespace Limoncello.Controllers
             TempData["message"] = "Project deleted successfully";
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Index");
+        }
+
+        [HttpPost]
+        public IActionResult MakeOrganizer(int projectId, string userId)
+        {
+            var project = db.Projects.Find(projectId);
+
+            var userProject = db.UserProjects.Where(up => up.ProjectId == projectId && up.UserId == userId);
+
+            if (userProject == null)
+            {
+                TempData["message"] = "The user is not part of the board!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+
+            project.OrganizerId = userId;
+            db.SaveChanges();
+
+            TempData["message"] = "Organizer changed successfully!";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Show", new { id = projectId });
         }
     }
 }
