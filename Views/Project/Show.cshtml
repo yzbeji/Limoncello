@@ -5,7 +5,17 @@
 <div class="mt-3">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>@Model.Name</h1>
-        <a href="/Project/Settings/@Model.Id" class="btn btn-secondary">Settings</a>
+        @if (ViewBag.UserId == Model.OrganizerId){
+            <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary">Settings</a>
+        }
+        else{
+            <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
+                <input type="hidden" name="projectId" value="@Model.Id" />
+                <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger">
+                    Leave Board
+                </button>
+            </form>
+        }
     </div>
     <div class="row">
         @foreach(var column in Model.TaskColumns)  @* Design is not yet in final form! *@
@@ -29,3 +39,30 @@
         }
     </div>
 </div>
+
+@* Leave board confirmation popup *@
+<div class="modal fade" id="leaveBoardModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Leave board</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to leave the board?
+            </div>
+            <div class="modal-footer flex-column">
+                <button type="button" class="btn btn-danger" onclick="submitLeaveBoardForm()">Leave</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function submitLeaveBoardForm(){
+        document.getElementById("leaveBoardForm").submit();
+    }
+</script>

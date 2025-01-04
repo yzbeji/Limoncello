@@ -241,6 +241,32 @@ namespace Limoncello.Controllers
         }
 
         [HttpPost]
+        public IActionResult LeaveBoard(int projectId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var userProject = db.UserProjects
+                                .Where(up => up.ProjectId == projectId && up.UserId == userId)
+                                .FirstOrDefault();
+
+            var project = db.Projects.Find(projectId);
+            if (project.OrganizerId == userId)
+            {
+                // should not be able to reach this through UI
+
+                TempData["message"] = "You are the organizer of this board!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = projectId });
+            }
+
+            db.UserProjects.Remove(userProject);
+            db.SaveChanges();
+
+            TempData["message"] = "You left the board!";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Index");
+        }
+
+        [HttpPost]
         [Authorize(Roles = "User,Admin")]
         public IActionResult Delete(int id)
         {
