@@ -1,0 +1,102 @@
+﻿.tall-card {
+    min-height: 100px;
+    border: 1px;
+    border-color: black;
+}
+
+.card-link {
+    text-decoration: none;
+    color: inherit;
+    user-select: none;
+}
+
+
+.alert {
+    font-family: 'Poppins', sans-serif;
+    padding: 15px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+}
+
+
+.alert-success {
+    background-color: #28a745; 
+    color: white;
+    border-left: 5px solid #155724;
+}
+
+
+.alert-danger {
+    background-color: #dc3545; 
+    color: white;
+    border-left: 5px solid #721c24;
+}
+
+
+.alert .close {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 20px;
+    color: white; 
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+}
+
+   
+.alert .close:hover {
+        color: #ccc; 
+}
+
+
+.alert-dismissible {
+    padding-right: 40px;
+}
+
+@keyframes alert-fade-in {
+    0% {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.alert {
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: alert-fade-in 0.5s forwards;
+}
+
+
+@keyframes alert-fade-out {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(10px);
+        visibility: hidden;
+    }
+}
+
+.alert.fade-out {
+    animation: alert-fade-out 1s forwards;
+}
+
+
+
+

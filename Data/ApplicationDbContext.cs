@@ -13,6 +13,8 @@ namespace Limoncello.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Project> Projects { get; set; }
         public DbSet<UserProject> UserProjects { get; set; }
+        public DbSet<ProjectTask> ProjectTasks { get; set; }
+        public DbSet<TaskColumn> TaskColumns { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {

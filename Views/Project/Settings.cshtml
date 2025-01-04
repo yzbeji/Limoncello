@@ -1,0 +1,181 @@
+﻿@model Limoncello.Models.Project
+
+<partial name="TempMessagePartial" model="Model" />
+
+<div class="mt-3">
+    <h1>
+        <a asp-action="Show" asp-controller="Project" asp-route-id="@Model.Id" class="no-underline-no-colour">
+            ←
+        </a>
+        Project Settings
+    </h1>
+    <hr />
+
+    @* Board name *@
+    <form method="post" asp-action="Edit" asp-controller="Project">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="form-group">
+            <input asp-for="Id" type="hidden" value="@Model.Id"/>
+            <label asp-for="Name" class="form-label">Board name</label>
+            <br />
+            <input asp-for="Name" class="form-control" />
+        </div>
+        <br />
+        <button type="submit" class="btn button-gradient align-self-center">Save name</button>
+    </form>
+
+    @* Board members *@
+    <div class="d-flex align-items-center mt-3">
+        <h2>Board Members</h2>
+        <button type="button" class="btn button-gradient m-3" data-toggle="modal" data-target="#myModal">
+            + Add Member
+        </button>
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="myModalLabel">Create board</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="post" action="/Project/AddMember">
+                            <input id="projectId" name="ProjectId" class="form-control" type="hidden" value="@Model.Id" />
+                            <div class="form-group">
+                                <label type="text" name="userEmail" class="form-label">User Email</label>
+                                <input id="userEmail" name="UserEmail" class="form-control" type="email" />
+                            </div>
+                            <br />
+                            <button type="submit" class="btn button-gradient align-self-center">Submit</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="d-flex flex-row flex-wrap">
+        @foreach (var userProject in Model.UserProjects)
+        {
+            var user = userProject.User;
+            var base64String = userProject.User.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+            <div class="form-group m-3 dropdown">
+                <img id="profile-picture-@userProject.UserId"
+                    class="dropdown-toggle"
+                    src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                    alt="Profile Picture"
+                    style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false" />
+                @if (userProject.UserId == Model.OrganizerId)
+                {
+                    <img src="/images/crown.png" class="crown-icon" alt="Organizer" />
+                }
+                <ul class="dropdown-menu">
+                    <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
+                    @if (userProject.UserId != ViewBag.UserId)
+                    {
+                        <li>
+                            <form id="changeOrgForm_@userProject.UserId" asp-action="MakeOrganizer" asp-controller="Project">
+                                <input type="hidden" name="projectId" value="@Model.Id" />
+                                <input type="hidden" name="userId" value="@userProject.UserId" />
+                                <button type="button"
+                                    class="dropdown-item"
+                                    data-toggle="modal"
+                                    data-target="#changeOrgModal"
+                                    onclick="setPendingOrgIdChange('@userProject.UserId')">
+                                        Make Organizer
+                                </button>
+                            </form>
+                        </li>
+                        <li>
+                            <form method="post" asp-action="RemoveMember" asp-controller="Project">
+                                <input type="hidden" name="projectId" value="@Model.Id" />
+                                <input type="hidden" name="userId" value="@userProject.UserId" />
+                                <button class="dropdown-item">Remove from board</button>
+                            </form>
+                        </li>
+                    }
+                </ul>
+            </div>
+        }
+
+    </div>
+    
+</div>
+
+@* Delete board *@
+<div class="mt-5">
+    <button type="button" class="btn btn-danger" data-toggle="modal" data-target="#deleteModal">Delete Project</button>
+    <form id="deleteForm" method="post" asp-action="Delete" asp-controller="Project" style="display: none;">
+        <input asp-for="Id" type="hidden" value="@Model.Id" />
+    </form>
+</div>
+
+@* Delete confirmation popup *@
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this project?
+            </div>
+            <div class="modal-footer flex-column">
+                <button type="button" class="btn btn-danger" onclick="submitDeleteForm()">Delete</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@* Change orgnaizer confirmation popup *@
+<div class="modal fade" id="changeOrgModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Change Organizer</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to change the organizer?
+                <br />
+                You will lose the role!
+            </div>
+            <div class="modal-footer flex-column">
+                <button type="button" class="btn btn-danger" onclick="submitChangeOrgForm()">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function setPendingOrgIdChange(userId){
+        localStorage.setItem("pendingOrgIdChange", userId);
+    }
+
+    function toggleMenu(menuId) {
+        var menu = document.getElementById(menuId);
+        if (menu.style.display === "none" || menu.style.display === "") {
+            menu.style.display = "block";
+        } else {
+            menu.style.display = "none";
+        }
+    }
+
+    function submitDeleteForm() {
+        document.getElementById("deleteForm").submit();
+    }
+
+    function submitChangeOrgForm(){
+		var pendingOrgId = localStorage.getItem("pendingOrgIdChange");
+        document.getElementById("changeOrgForm_" + pendingOrgId).submit();
+    }
+</script>
