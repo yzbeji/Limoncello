@@ -29,7 +29,7 @@ namespace Limoncello.Controllers
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
-            return View();
+            return RedirectPermanent("Project");
         }
 
         public IActionResult Privacy()
