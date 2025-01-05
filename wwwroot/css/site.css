@@ -248,5 +248,9 @@ body {
     color: inherit;
 }
 
+.cursor-pointer{
+    cursor: pointer;
+}
+
 
 

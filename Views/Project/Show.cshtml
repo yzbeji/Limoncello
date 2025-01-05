@@ -46,17 +46,17 @@
 
     <div class="d-flex">
         @foreach(var column in Model.TaskColumns){
-            <div id="columnBody" class="me-4">
+            <div id="columnBody" class="me-4 rounded-3">
                 @* Title *@
-                <div class="card-header me-4"> 
+                <div class="card-header me-4 rounded"> 
                     Column Name: @column.Name 
                 </div>
                 @* Tasks *@
 
-                <div id="tasks" class="col-md-4 flex-shrink-0" style="max-height:calc(65vh); overflow-y:auto;">
+                <div id="tasks" class="col-md-4 flex-shrink-0" style="max-height:calc(65vh); overflow-y:auto;border-radius:3%;">
                     @foreach (var task in column.ProjectTasks)
                     {
-                        <div class="card-body" style="border:1px solid black;cursor: pointer;" data-toggle="modal" data-target="#taskDetailsModal-@task.Id">
+                        <div class="card-body m-2 rounded border border-dark cursor-pointer" data-toggle="modal" data-target="#taskDetailsModal-@task.Id">
                             <h5>Task name: @task.Title</h5>
                         </div>
 
