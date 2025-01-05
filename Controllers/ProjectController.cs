@@ -158,8 +158,8 @@ namespace Limoncello.Controllers
             {
                 TempData["message"] = "You must name the board!";
                 TempData["messageType"] = "alert-danger";
-                return RedirectToAction("Settings", new { id = reqProject.Id});
-            }   
+                return RedirectToAction("Settings", new { id = reqProject.Id });
+            }
         }
 
         [HttpPost]
@@ -316,6 +316,81 @@ namespace Limoncello.Controllers
             TempData["message"] = "Organizer changed successfully!";
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Show", new { id = projectId });
+        }
+
+        [HttpPost]
+        public IActionResult AddTaskColumn([FromForm] TaskColumn reqTaskColumn)
+        {
+            var project = db.Projects.Find(reqTaskColumn.ProjectId);
+            var userId = _userManager.GetUserId(User);
+
+            if (project.OrganizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = reqTaskColumn.ProjectId });
+            }
+
+            if (ModelState.IsValid)
+            {
+                db.TaskColumns.Add(reqTaskColumn);
+                db.SaveChanges();
+                TempData["message"] = "Column added successfully!";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Show", new { id = reqTaskColumn.ProjectId });
+            }
+            else
+            {
+                TempData["message"] = "You must name the column!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = reqTaskColumn.ProjectId });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult AddTask([FromForm] ProjectTask reqTask)
+        {
+            var userId = _userManager.GetUserId(User);
+            var organizerId = db.TaskColumns
+                                    .Include(tc => tc.Project)
+                                    .Where(tc => tc.Id == reqTask.TaskColumnId)
+                                    .Select(tc => tc.Project.OrganizerId)
+                                    .FirstOrDefault();
+            var projectId = db.TaskColumns
+                                .Include(tc => tc.Project)
+                                .Where(tc => tc.Id == reqTask.TaskColumnId)
+                                .Select(tc => tc.Project.Id)
+                                .FirstOrDefault();
+
+            if (organizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            if (reqTask.StartDate.HasValue && reqTask.DueDate.HasValue && reqTask.StartDate.Value > reqTask.DueDate.Value)
+            {
+                ModelState.AddModelError("DueDate", "Due Date must be after Start Date.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                reqTask.Status = Models.TaskStatus.NotStarted;
+
+                db.ProjectTasks.Add(reqTask);
+                db.SaveChanges();
+                TempData["message"] = "Task added successfully!";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Show", new { id = projectId });
+            }
+            else
+            {
+                var errorMessages = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["message"] = string.Join(" ", errorMessages);
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = projectId });
+            }
         }
     }
 }

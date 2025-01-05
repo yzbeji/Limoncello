@@ -1,8 +1,12 @@
 ﻿@model Limoncello.Models.Project
 
+@{
+    bool isOrganizer = ViewBag.UserId == Model.OrganizerId;
+}
+
 <partial name="TempMessagePartial" model="Model" />
 
-<div class="mt-3">
+<div class="mt-3 h-100">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>
             <a asp-action="Index" asp-controller="Project" class="no-underline-no-colour">
@@ -10,8 +14,25 @@
             </a>
             @Model.Name
         </h1>
-        @if (ViewBag.UserId == Model.OrganizerId){
-            <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary">Settings</a>
+        @if (isOrganizer){
+            <div class="d-flex align-items-center">
+                <div class="dropdown me-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Add Task Column
+                    </button>
+                    <div class="dropdown-menu p-3" aria-labelledby="dropdownMenuButton" style="width: 300px;">
+                        <form method="post" asp-action="AddTaskColumn" asp-controller="Project">
+                            <input type="hidden" name="ProjectId" value="@Model.Id" />
+                            <div class="form-group">
+                                <label for="Name" class="ms-3">Column Name</label>
+                                <input type="text" class="form-control m-3 w-auto" name="Name" required />
+                            </div>
+                            <button type="submit" class="dropdown-item btn m-3">Create Column</button>
+                        </form>
+                    </div>
+                </div>
+                <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary">Settings</a>
+            </div>
         }
         else{
             <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
@@ -22,24 +43,58 @@
             </form>
         }
     </div>
-    <div class="row">
-        @foreach(var column in Model.TaskColumns)  @* Design is not yet in final form! *@
-        {
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        Column Name: @column.Name
-                    </div>
-                    <div class="card-body">
-                        @foreach (var task in column.ProjectTasks)
-                        {
-                            <div class="mb-2">
-                                <h5>Task Name: @task.Name</h5>
-                                <p>Task Description: @task.Description</p>
-                            </div>
-                        }
-                    </div>
+
+    <div class="d-flex">
+        @foreach(var column in Model.TaskColumns){
+            <div id="columnBody" class="me-4">
+                @* Title *@
+                <div class="card-header me-4"> 
+                    Column Name: @column.Name 
                 </div>
+                @* Tasks *@
+
+                <div id="tasks" class="col-md-4 flex-shrink-0" style="max-height:calc(65vh); overflow-y:auto;">
+                    @foreach (var task in column.ProjectTasks)
+                    {
+                        <div class="card-body" style="border:1px solid black;cursor: pointer;" data-toggle="modal" data-target="#taskDetailsModal-@task.Id">
+                            <h5>Task name: @task.Title</h5>
+                        </div>
+
+                        @* Task details modal *@
+                        <div class="modal fade" id="taskDetailsModal-@task.Id" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModalLabel-@task.Id" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="taskDetailsModalLabel-@task.Id">Task Details</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h5>@task.Title</h5>
+                                        <p>Description: @task.Description</p>
+                                        <p>Status: @task.Status</p>
+                                        <p>Content: @task.Content</p>
+                                        <p><strong>Start Date:</strong> @task.StartDate</p>
+                                        <p><strong>Due Date:</strong> @task.DueDate</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @if (isOrganizer) 
+                { 
+                    <div class="dropdown card">
+                        <button type="button" 
+                                data-toggle="modal" 
+                                data-target="#addTaskModal" 
+                                class="btn" 
+                                onclick="updateTaskColIdOnForm(@column.Id)">
+                            Add Task
+                        </button>
+                     </div> 
+                 }
             </div>
         }
     </div>
@@ -66,8 +121,57 @@
     </div>
 </div>
 
+@* Create task popup *@
+<div class="modal fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addTaskModalLabel">Add Task</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" asp-action="AddTask" asp-controller="Project">
+                    <input type="hidden" name="TaskColumnId" value="" id="taskColumnId" />
+                    <div class="form-group">
+                        <label for="Title">Title</label>
+                        <input type="text" class="form-control" name="Title" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="Description">Description</label>
+                        <textarea class="form-control" name="Description" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="StartDate">Start Date</label>
+                        <input type="date" class="form-control" name="StartDate" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="DueDate">Due Date</label>
+                        <input type="date" class="form-control" name="DueDate" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3">Create Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     function submitLeaveBoardForm(){
         document.getElementById("leaveBoardForm").submit();
     }
+
+    function updateTaskColIdOnForm(id){
+        document.getElementById("taskColumnId").value = id;
+    }
 </script>
+
+<style>
+    .d-flex.overflow-auto {
+        white-space: nowrap;
+    }
+    .col-md-4 {
+        width: 300px;
+    }
+</style>
