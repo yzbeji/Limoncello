@@ -1,6 +1,7 @@
 ﻿using Limoncello.Data;
 using Limoncello.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.Execution;
@@ -53,7 +54,7 @@ namespace Limoncello.Controllers
         {
             // TODO check if the user has access to this project
             string userId = _userManager.GetUserId(User);
-            var project = db.Projects.Include(p => p.TaskColumns).ThenInclude(tc => tc.ProjectTasks)
+            var project = db.Projects.Include(p => p.TaskColumns).ThenInclude(tc => tc.ProjectTasks).ThenInclude(c => c.Comments).ThenInclude(u => u.User)
                           .Where(p => p.Id == id)
                           .FirstOrDefault();
             var projectUsers = db.UserProjects
@@ -318,6 +319,44 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId });
         }
 
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost]
+        public IActionResult AddComment(Comment comment)
+        {
+            comment.UserId = _userManager.GetUserId(User);
+            comment.CreatedDate = DateTime.Now;
+            var projectId = db.ProjectTasks
+                       .Include(pt => pt.TaskColumn)
+                       .ThenInclude(tc => tc.Project)
+                       .Where(pt => pt.Id == comment.ProjectTaskId)
+                       .Select(pt => pt.TaskColumn.Project.Id) 
+                       .FirstOrDefault();
+            db.Comments.Add(comment);
+            db.SaveChanges();
+            return RedirectToAction("Show", new { id = projectId });
+        }
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost]
+        public IActionResult RemoveComment([FromForm] int commentId) 
+        {
+            var comment = db.Comments.FirstOrDefault(c => c.Id == commentId);
+            var projectId = db.ProjectTasks
+                       .Include(pt => pt.TaskColumn)
+                       .ThenInclude(tc => tc.Project)
+                       .Where(pt => pt.Id == comment.ProjectTaskId)
+                       .Select(pt => pt.TaskColumn.Project.Id)
+                       .FirstOrDefault();
+            if (comment != null)
+            {
+                db.Comments.Remove(comment);
+                db.SaveChanges();
+                return RedirectToAction("Show", new { id = projectId });
+            }
+            else
+            {
+                return BadRequest();
+            }
+        }
         [HttpPost]
         public IActionResult AddTaskColumn([FromForm] TaskColumn reqTaskColumn)
         {

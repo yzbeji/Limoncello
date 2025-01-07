@@ -15,7 +15,7 @@ namespace Limoncello.Data
         public DbSet<UserProject> UserProjects { get; set; }
         public DbSet<ProjectTask> ProjectTasks { get; set; }
         public DbSet<TaskColumn> TaskColumns { get; set; }
-
+        public DbSet<Comment> Comments { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);

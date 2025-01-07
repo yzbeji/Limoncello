@@ -59,28 +59,79 @@
                         <div class="card-body m-2 rounded border border-dark cursor-pointer" data-toggle="modal" data-target="#taskDetailsModal-@task.Id">
                             <h5>Task name: @task.Title</h5>
                         </div>
-
-                        @* Task details modal *@
                         <div class="modal fade" id="taskDetailsModal-@task.Id" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModalLabel-@task.Id" aria-hidden="true">
-                            <div class="modal-dialog" role="document">
+                            <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="taskDetailsModalLabel-@task.Id">Task Details</h5>
+                                    <div class="modal-header border-bottom-0">
+                                        <h5 class="modal-title text-dark" id="taskDetailsModalLabel-@task.Id">Task Details</h5>
                                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                                             <span aria-hidden="true">&times;</span>
                                         </button>
                                     </div>
                                     <div class="modal-body">
-                                        <h5>@task.Title</h5>
-                                        <p>Description: @task.Description</p>
-                                        <p>Status: @task.Status</p>
-                                        <p>Content: @task.Content</p>
+                                        <h4 class="text-dark">@task.Title</h4>
+                                        <p><strong>Description:</strong> @task.Description</p>
+                                        <p><strong>Status:</strong> <span class="badge badge-secondary">@task.Status</span></p>
+                                        <p><strong>Content:</strong> @task.Content</p>
                                         <p><strong>Start Date:</strong> @task.StartDate</p>
                                         <p><strong>Due Date:</strong> @task.DueDate</p>
+                                        <hr />
+                                        <div class="mt-4">
+                                            <h5 class="text-dark">Comments</h5>
+                                            <div class="list-group">
+                                                @foreach (var comment in task.Comments)
+                                                {
+                                                    var base64String = comment.User.ProfilePicture != null ? Convert.ToBase64String(comment.User.ProfilePicture) : null;
+                                                    <div class="list-group-item p-3 mb-2 border rounded shadow-sm">
+                                                       <div class="list-group-item p-3 mb-3 border rounded shadow-sm d-flex align-items-start">
+                                                            <img id="profile-picture-@comment.User.Id"
+                                                                 class="dropdown-toggle me-3"
+                                                                 src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                                                                 alt="Profile Picture"
+                                                                 style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
+                                                                 data-bs-toggle="dropdown"
+                                                                 aria-expanded="false" />
+                                                            <div class="flex-grow-1">
+                                                                <div class="d-flex justify-content-between align-items-center">
+                                                                    <h6 class="mb-1" style="font-weight: bold;">@comment.User.FirstName @comment.User.LastName/h6>
+                                                                    <small class="text-muted">@comment.CreatedDate.ToString("MMMM dd, yyyy HH:mm")</small>
+                                                                </div>
+                                                                <p class="mt-2 mb-0" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; word-break: break-word;">
+                                                                    @comment.Content
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        @if (ViewBag.UserId == comment.UserId)
+                                                        {
+                                                            <div class="mt-2 text-end">
+                                                                <form method="post" asp-action="RemoveComment" asp-controller="Project" onsubmit="return confirm('Are you sure you want to delete this comment?')">
+                                                                    <input type="hidden" name="commentId" value="@comment.Id" />
+                                                                    <button type="submit" class="btn btn-danger btn-sm">
+                                                                        <i class="fas fa-trash"></i>  
+                                                                    </button>
+                                                                </form>
+                                                            </div>
+                                                        }
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                        <form method="post" asp-action="AddComment" asp-controller="Project" class="mt-4">
+                                            <input type="hidden" name="ProjectTaskId" value="@task.Id" id="projectTaskId" />
+                                            <div class="form-group">
+                                                <label for="Content" class="font-weight-bold">Add a comment</label>
+                                                <br />
+                                                <br />
+                                                <textarea id="Content" name="Content" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary mt-3">Add Comment</button>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
+
                     }
                 </div>
                 @if (isOrganizer) 

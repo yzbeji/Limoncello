@@ -20,5 +20,6 @@ namespace Limoncello.Models
         public string? Content { get; set; }
         public int TaskColumnId { get; set; }
         public virtual TaskColumn? TaskColumn { get; set; }
+        public virtual ICollection<Comment>? Comments { get; set; }
     }
 }

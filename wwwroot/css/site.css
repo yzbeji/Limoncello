@@ -26,6 +26,11 @@ a:hover {
   color: #3700b3;  
 }
 
+.list-group-item {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+
 .btn {
     background-color: #F0F0F0;
     color: #121212;
