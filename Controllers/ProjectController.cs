@@ -431,5 +431,115 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Show", new { id = projectId });
             }
         }
+
+        [HttpPost]
+        public IActionResult EditTask([FromForm] ProjectTask reqTask)
+        {
+            var userId = _userManager.GetUserId(User);
+            var organizerId = db.TaskColumns
+                                    .Include(tc => tc.Project)
+                                    .Where(tc => tc.Id == reqTask.TaskColumnId)
+                                    .Select(tc => tc.Project.OrganizerId)
+                                    .FirstOrDefault();
+            var projectId = db.TaskColumns
+                                .Include(tc => tc.Project)
+                                .Where(tc => tc.Id == reqTask.TaskColumnId)
+                                .Select(tc => tc.Project.Id)
+                                .FirstOrDefault();
+
+            if (organizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            if (reqTask.StartDate.HasValue && reqTask.DueDate.HasValue && reqTask.StartDate.Value > reqTask.DueDate.Value)
+            {
+                ModelState.AddModelError("DueDate", "Due Date must be after Start Date.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                db.ProjectTasks.Add(reqTask);
+                db.SaveChanges();
+                TempData["message"] = "Task added successfully!";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Show", new { id = projectId });
+            }
+            else
+            {
+                var errorMessages = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["message"] = string.Join(" ", errorMessages);
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = projectId });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult EditTaskStatus([FromForm] ProjectTask reqTask)
+        {
+
+            var userId = _userManager.GetUserId(User);
+            var task = db.ProjectTasks
+                            .Include(t => t.TaskColumn)
+                            .ThenInclude(tc => tc.Project)
+                            .ThenInclude(p => p.UserProjects)
+                            .Where(t => t.Id == reqTask.Id)
+                            .FirstOrDefault();
+            
+            if (task == null)
+            {
+                return Json(new { success = false, message = "Task not found" });
+            }
+
+            var projectUserIds = task.TaskColumn.Project.UserProjects.Select(up => up.UserId).ToList();
+
+            if (!projectUserIds.Contains(userId))
+            {
+                return Json(new { success = false, message = "You do not have permission to update this task" });
+            }
+
+            task.Status = reqTask.Status;
+            db.SaveChanges();
+
+            return Json(new
+            {
+                success = true,
+                message = "Task status updated!"
+            });
+        }
+
+        [HttpPost]
+        public IActionResult DeleteTask(int taskId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var organizerId = db.ProjectTasks
+                                    .Include(t => t.TaskColumn)
+                                    .ThenInclude(tc => tc.Project)
+                                    .Where(t => t.Id == taskId)
+                                    .Select(t => t.TaskColumn.Project.OrganizerId)
+                                    .FirstOrDefault();
+            var projectId = db.ProjectTasks
+                                .Include(t => t.TaskColumn)
+                                .ThenInclude(tc => tc.Project)
+                                .Where(t => t.Id == taskId)
+                                .Select(t => t.TaskColumn.Project.Id)
+                                .FirstOrDefault();
+
+            if (organizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            db.ProjectTasks.Remove(db.ProjectTasks.Find(taskId));
+            db.SaveChanges();
+
+            TempData["message"] = "Task deleted successfully!";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Show", new { id = projectId});
+        }
     }
 }
