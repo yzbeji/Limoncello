@@ -30,7 +30,9 @@ a:hover {
     max-width: 100%;
     word-wrap: break-word;
 }
-
+.ms-10 {
+    margin-left: 16.7rem;
+}
 .btn {
     background-color: #F0F0F0;
     color: #121212;

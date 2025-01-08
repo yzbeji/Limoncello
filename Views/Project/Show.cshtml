@@ -75,7 +75,6 @@
             </form>
         }
     </div>
-
     <div class="d-flex w-100 overflow-auto">
         @foreach (var column in Model.TaskColumns)
         {
@@ -85,7 +84,6 @@
                     Column Name: @column.Name
                 </div>
                 @* Tasks *@
-
                 <div id="tasks" class="col-md-4 flex-shrink-0 overflow-auto rounded" style="max-height:calc(65vh);">
                     @foreach (var task in column.ProjectTasks)
                     {
@@ -93,7 +91,6 @@
                         <div id="taskCard-@task.Id" class="card-body m-2 rounded border border-2 @statusColor cursor-pointer" data-toggle="modal" data-target="#taskDetailsModal-@task.Id">
                             <h5>Task name: @task.Title</h5>
                         </div>
-
                         <div class="modal fade" id="taskDetailsModal-@task.Id" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModalLabel-@task.Id" aria-hidden="true">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
@@ -218,14 +215,27 @@
                                                                     <h6 class="mb-1" style="font-weight: bold;">@comment.User.FirstName @comment.User.LastName</h6>
                                                                     <small class="text-muted">@comment.CreatedDate.ToString("MMMM dd, yyyy HH:mm")</small>
                                                                 </div>
-                                                                <p class="mt-2 mb-0" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; word-break: break-word;">
+                                                                <p id="comment-content-@comment.Id" class="mt-2 mb-0" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; word-break: break-word;">
                                                                     @comment.Content
                                                                 </p>
+                                                                <div id="edit-comment-form-@comment.Id" class="mt-3 d-none">
+                                                                    <form method="post" asp-action="SaveEditedComment" asp-controller="Project">
+                                                                        <input type="hidden" name="id" value="@comment.Id" />
+                                                                        <textarea name="Content" class="form-control" rows="4">@comment.Content</textarea>
+                                                                        <div class="mt-2 d-flex gap-2">
+                                                                            <button type="submit" class="btn btn-success btn-sm">Save</button>
+                                                                            <button type="button" class="btn btn-danger btn-sm" onclick="cancelEdit(@comment.Id)">Cancel</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         @if (ViewBag.UserId == comment.UserId)
                                                         {
-                                                            <div class="mt-2 text-end">
+                                                            <div class="ms-10 mt-2 text-start d-flex justify-content-start gap-2">
+                                                                <button type="button" class="btn btn-warning btn-sm" onclick="editComment(@comment.Id)">
+                                                                    <i class="fas fa-edit"></i> Edit
+                                                                </button>
                                                                 <form method="post" asp-action="RemoveComment" asp-controller="Project" onsubmit="return confirm('Are you sure you want to delete this comment?')">
                                                                     <input type="hidden" name="commentId" value="@comment.Id" />
                                                                     <button type="submit" class="btn btn-danger btn-sm">
@@ -235,6 +245,16 @@
                                                             </div>
                                                         }
                                                     </div>
+                                                    <script>
+                                                        function editComment(commentId) {   
+                                                            document.getElementById(`comment-content-${commentId}`).classList.add('d-none');
+                                                            document.getElementById(`edit-comment-form-${commentId}`).classList.remove('d-none');
+                                                        }
+                                                        function cancelEdit(commentId) { 
+                                                            document.getElementById(`comment-content-${commentId}`).classList.remove('d-none');
+                                                            document.getElementById(`edit-comment-form-${commentId}`).classList.add('d-none');
+                                                        }
+                                                    </script>
                                                 }
                                             </div>
                                         </div>
@@ -363,6 +383,17 @@
         </div>
     </div>
 </div>
+
+<script>
+    @if ((TempData["ShowModal"] as bool?) == true)
+    {
+        <text>
+            let modal = new bootstrap.Modal(document.getElementById('taskDetailsModal-' + @(TempData["TaskId"] as int?)));
+        modal.show();
+        </text>
+        TempData["ShowModal"] = false;
+    }
+</script>
 
 <script>
     function submitLeaveBoardForm(){

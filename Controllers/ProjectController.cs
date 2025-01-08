@@ -142,7 +142,25 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Index");
             }
         }
+        [HttpPost]
+        [Authorize(Roles = "User,Admin")]
+        public IActionResult SaveEditedComment([FromForm]int id, [FromForm]string? content)
+        {
+            var comment = db.Comments.FirstOrDefault(c => c.Id == id);
+            comment.Content = content;
+            var projectId = db.ProjectTasks
+                   .Include(pt => pt.TaskColumn)
+                   .ThenInclude(tc => tc.Project)
+                   .Where(pt => pt.Id == comment.ProjectTaskId)
+                   .Select(pt => pt.TaskColumn.Project.Id)
+                   .FirstOrDefault();
+            db.SaveChanges();
+            TempData["ShowModal"] = true;
+            TempData["TaskId"] = comment.ProjectTaskId;
+            return RedirectToAction("Show", new { id = projectId });
+        }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult Edit(Project reqProject)
         {
@@ -341,6 +359,8 @@ namespace Limoncello.Controllers
                        .FirstOrDefault();
             db.Comments.Add(comment);
             db.SaveChanges();
+            TempData["ShowModal"] = true;
+            TempData["TaskId"] = comment.ProjectTaskId;
             return RedirectToAction("Show", new { id = projectId });
         }
         [Authorize(Roles = "User,Admin")]
@@ -358,6 +378,8 @@ namespace Limoncello.Controllers
             {
                 db.Comments.Remove(comment);
                 db.SaveChanges();
+                TempData["ShowModal"] = true;
+                TempData["TaskId"] = comment.ProjectTaskId;
                 return RedirectToAction("Show", new { id = projectId });
             }
             else
