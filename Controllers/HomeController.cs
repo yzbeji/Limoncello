@@ -25,11 +25,16 @@ namespace Limoncello.Controllers
         }
 
         private readonly ILogger<HomeController> _logger;
-
-        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
-            return RedirectPermanent("Project");
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Project");
+            }
+            else
+            {
+                return View();
+            }
         }
 
         public IActionResult Privacy()
