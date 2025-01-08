@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Build.Execution;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Limoncello.Controllers
 {
@@ -52,11 +53,18 @@ namespace Limoncello.Controllers
         // TODO: require authorization
         public IActionResult Show(int? id)
         {
-            // TODO check if the user has access to this project
             string userId = _userManager.GetUserId(User);
-            var project = db.Projects.Include(p => p.TaskColumns).ThenInclude(tc => tc.ProjectTasks).ThenInclude(c => c.Comments).ThenInclude(u => u.User)
-                          .Where(p => p.Id == id)
-                          .FirstOrDefault();
+            var project = db.Projects
+                                .Include(p => p.TaskColumns)
+                                .ThenInclude(tc => tc.ProjectTasks)
+                                .ThenInclude(c => c.Comments)
+                                .ThenInclude(u => u.User)
+                                .Include(p => p.TaskColumns)
+                                .ThenInclude(tc => tc.ProjectTasks)
+                                .ThenInclude(u => u.UserTasks)
+                                .ThenInclude(u => u.User)
+                                .Where(p => p.Id == id)
+                                .FirstOrDefault();
             var projectUsers = db.UserProjects
                                .Where(up => project.Id == up.ProjectId)
                                .Select(up => up.UserId)
@@ -508,6 +516,79 @@ namespace Limoncello.Controllers
                 success = true,
                 message = "Task status updated!"
             });
+        }
+
+        [HttpPost]
+        public IActionResult AddUserToTask(int taskId, string userId)
+        {
+            var task = db.ProjectTasks.Find(taskId);
+            var project = db.Projects
+                            .Include(p => p.UserProjects)
+                            .FirstOrDefault(p => p.Id == task.TaskColumn.ProjectId);
+            if (project == null)
+            {
+                TempData["message"] = "Project not found";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            var organizerId = project.OrganizerId;
+            var currentUserId = _userManager.GetUserId(User);
+            if (organizerId != currentUserId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
+            }
+
+            var userTask = new UserTask
+            {
+                UserId = userId,
+                TaskId = taskId
+            };
+
+            db.UserTasks.Add(userTask);
+            db.SaveChanges();
+
+            TempData["message"] = "User added to task";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveUserFromTask(int taskId, string userId)
+        {
+            var userTask = db.UserTasks
+                            .Where(ut => ut.TaskId == taskId && ut.UserId == userId)
+                            .FirstOrDefault();
+            if (userTask == null)
+            {
+                TempData["message"] = "Something went wrong!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
+
+            var task = db.ProjectTasks
+                            .Include(pt => pt.TaskColumn)
+                            .ThenInclude(tc => tc.Project)
+                            .Where(pt => pt.Id == taskId)
+                            .FirstOrDefault();
+            var organizerId = task.TaskColumn.Project.OrganizerId;
+            var currentUserId = _userManager.GetUserId(User);
+            if (organizerId != currentUserId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
+            }
+
+
+            db.UserTasks.Remove(userTask);
+            db.SaveChanges();
+
+            TempData["message"] = "User removed successfully!";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
         }
 
         [HttpPost]

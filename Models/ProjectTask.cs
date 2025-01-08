@@ -21,5 +21,6 @@ namespace Limoncello.Models
         public int TaskColumnId { get; set; }
         public virtual TaskColumn? TaskColumn { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; }
+        public virtual ICollection<UserTask>? UserTasks { get; set; }
     }
 }

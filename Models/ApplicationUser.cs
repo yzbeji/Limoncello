@@ -11,5 +11,6 @@ namespace Limoncello.Models
         public string? JobTitle { get; set; }
         public byte[]? ProfilePicture { get; set; }
         public virtual ICollection<UserProject>? UserProjects { get; set; }
+        public virtual ICollection<UserTask>? UserTasks { get; set; }
     }
 }
