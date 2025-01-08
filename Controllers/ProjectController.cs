@@ -519,28 +519,20 @@ namespace Limoncello.Controllers
         }
 
         [HttpPost]
-        public IActionResult AddUserToTask(int taskId, string userId)
+        public IActionResult AddUserToTask(int taskId, string email)
         {
-            var task = db.ProjectTasks.Find(taskId);
-            var project = db.Projects
-                            .Include(p => p.UserProjects)
-                            .FirstOrDefault(p => p.Id == task.TaskColumn.ProjectId);
-            if (project == null)
-            {
-                TempData["message"] = "Project not found";
-                TempData["messageType"] = "alert-danger";
-                return RedirectToAction("Index");
-            }
+            var task = db.ProjectTasks.Include(t => t.TaskColumn).FirstOrDefault(t => t.Id == taskId);
 
-            var organizerId = project.OrganizerId;
-            var currentUserId = _userManager.GetUserId(User);
-            if (organizerId != currentUserId)
+            var organizerId = db.Projects.Where(p => p.Id == task.TaskColumn.ProjectId).Select(p => p.OrganizerId).FirstOrDefault();
+            var callerUserId = _userManager.GetUserId(User);
+            if (organizerId != callerUserId)
             {
                 TempData["message"] = "You are not the organizer of this project";
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
             }
 
+            var userId = _userManager.FindByEmailAsync(email).Result.Id;
             var userTask = new UserTask
             {
                 UserId = userId,
