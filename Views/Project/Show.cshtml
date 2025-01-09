@@ -132,14 +132,14 @@
                     {
                         var statusColor = GetStatusBorderColor(task.Status);
                         <div id="taskCard-@task.Id" class="card-body m-2 rounded border border-2 @statusColor cursor-pointer" data-toggle="modal" data-target="#taskDetailsModal-@task.Id">
-                            <h5>Task name: @task.Title</h5>
+                            <h5 class="ellipsis">@task.Title</h5>
                         </div>
                         <div class="modal fade" id="taskDetailsModal-@task.Id" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModalLabel-@task.Id" aria-hidden="true">
                             <div class="modal-dialog modal-lg" role="document">
                                 <div class="modal-content">
                                     @* 3 dots menu *@
-                                    <div class="modal-header border-bottom-0">
-                                        <h3 class="modal-title text-dark" id="taskDetailsModalLabel-@task.Id">@task.Title</h3>
+                                    <div class="modal-header border-bottom-0 d-felx justify-content-between align-items-start">
+                                        <h3 class="modal-title text-dark text-wrap" id="taskDetailsModalLabel-@task.Id">@task.Title</h3>
                                         <div class="d-flex justify-content-between">
                                             @if(isOrganizer){
                                                 <div class="dropdown">
@@ -163,6 +163,7 @@
                                     </div>
                                     @* Display task modal *@
                                     <div class="modal-body">
+                                        @* Status *@
                                         <div class="d-flex">
 											<p class="mt-2 me-2"><strong>Status:</strong></p>
                                             <div id="taskStatusColor-@task.Id" class="@GetStatusBackgroundSquare(task.Status) border me-2 mt-1 mb-3 p-2"></div>
@@ -175,16 +176,11 @@
 												</select>
 											</form>
                                         </div>
-                                        <p><strong>Start Date:</strong> @task.StartDate</p>
-                                        <p><strong>Due Date:</strong> @task.DueDate</p>
-                                        <p>
-                                            <strong>Description:</strong> <br />
-                                            @task.Description
-                                        </p>
-                                        <p><strong>Content:</strong> @task.Content</p>
+                                        @* Assigned members *@
                                         <div class="d-flex justify-content-between">
                                             <p><strong>Assigned to: </strong></p>
-                                            @if (isOrganizer){
+                                            @if (isOrganizer)
+                                            {
                                                 <div class="dropdown">
                                                     <button class="dropdown-toggle border rounded shadow-sm" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                         Add User
@@ -202,42 +198,58 @@
                                                 </div>
                                             }
                                         </div>
-
                                         <div class="d-flex">
-											@foreach (var userTask in task.UserTasks)
-											{
-												var user = userTask.User;
-												var base64String = userTask.User.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
-												<div class="form-group m-3 dropdown">
-													<img id="profile-picture-@userTask.UserId"
-														 class="dropdown-toggle"
-														 src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
-														 alt="Profile Picture"
-														 style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
-														 data-bs-toggle="dropdown"
-														 aria-expanded="false" />
-													<ul class="dropdown-menu">
-														<li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
-														@if (isOrganizer)
-														{
-															<li>
-																<form asp-action="RemoveUserFromTask" asp-controller="Project">
-																	<input type="hidden" name="taskId" value="@userTask.TaskId" />
-																	<input type="hidden" name="userId" value="@userTask.UserId" />
-																	<button type="submit"
-																			class="dropdown-item"
-																			data-toggle="modal"
-																			data-target="#changeOrgModal">
-																		Remove From Task
-																	</button>
-																</form>
-															</li>
-														}
-													</ul>
-												</div>
-											}
+                                            @foreach (var userTask in task.UserTasks)
+                                            {
+                                                var user = userTask.User;
+                                                var base64String = userTask.User.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+                                                <div class="form-group m-3 dropdown">
+                                                    <img id="profile-picture-@userTask.UserId"
+                                                         class="dropdown-toggle"
+                                                         src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                                                         alt="Profile Picture"
+                                                         style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
+                                                         data-bs-toggle="dropdown"
+                                                         aria-expanded="false" />
+                                                    <ul class="dropdown-menu">
+                                                        <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
+                                                        @if (isOrganizer)
+                                                        {
+                                                            <li>
+                                                                <form asp-action="RemoveUserFromTask" asp-controller="Project">
+                                                                    <input type="hidden" name="taskId" value="@userTask.TaskId" />
+                                                                    <input type="hidden" name="userId" value="@userTask.UserId" />
+                                                                    <button type="submit"
+                                                                            class="dropdown-item"
+                                                                            data-toggle="modal"
+                                                                            data-target="#changeOrgModal">
+                                                                        Remove From Task
+                                                                    </button>
+                                                                </form>
+                                                            </li>
+                                                        }
+                                                    </ul>
+                                                </div>
+                                            }
                                         </div>
-                                        
+                                        @* Start/Due Date *@
+                                        <p><strong>Start Date:</strong> @task.StartDate</p>
+                                        <p><strong>Due Date:</strong> @task.DueDate</p>
+                                        @* Description & Content *@
+                                        <p class="text-wrap text-break w-100">
+                                            <strong>Description:</strong> <br />
+                                            @task.Description
+                                        </p>
+                                        <p class="text-wrap text-break">
+                                            <strong>Content:</strong> 
+                                            <br />
+                                            @UrlHelper.RemoveUrls(task.Content)
+                                            @foreach (var link in UrlHelper.ExtractUrls(task.Content))
+                                            {
+                                                <partial name="EmbeddedContentPartial" model="link" />
+                                            }
+                                        </p>
+
                                         <hr />
                                         @* Comments *@
                                         <div class="mt-4">
@@ -311,7 +323,7 @@
                                                 <br />
                                                 <textarea id="Content" name="Content" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
                                             </div>
-                                            <button type="submit" class="btn btn-primary mt-3">Add Comment</button>
+                                            <button type="submit" class="btn mt-3">Add Comment</button>
                                         </form>
                                     </div>
                                 </div>
@@ -341,6 +353,10 @@
                                                 <textarea class="form-control" name="Description" rows="3" required>@task.Description</textarea>
                                             </div>
                                             <div class="form-group">
+                                                <label for="Content">Content</label>
+                                                <textarea class="form-control" name="Content" rows="3" required>@task.Content</textarea>
+                                            </div>
+                                            <div class="form-group">
                                                 <label for="StartDate">Start Date</label>
                                                 <input type="date" class="form-control" name="StartDate" value="@task.StartDate?.ToString("yyyy-MM-dd")" required  />
                                             </div>
@@ -348,7 +364,7 @@
                                                 <label for="DueDate">Due Date</label>
                                                 <input type="date" class="form-control" name="DueDate" value="@task.DueDate?.ToString("yyyy-MM-dd")" required />
                                             </div>
-                                            <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+                                            <button type="submit" class="btn mt-3">Save Changes</button>
                                         </form>
                                     </div>
                                 </div>
@@ -423,7 +439,7 @@
                         <label for="DueDate">Due Date</label>
                         <input type="date" class="form-control" name="DueDate" required />
                     </div>
-                    <button type="submit" class="btn btn-primary mt-3">Create Task</button>
+                    <button type="submit" class="btn mt-3">Create Task</button>
                 </form>
             </div>
         </div>

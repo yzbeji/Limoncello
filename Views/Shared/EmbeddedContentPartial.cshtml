@@ -1,0 +1,87 @@
+﻿@model string
+
+@{
+    string YTLinkToEmbeddedLink(string link)
+    {
+        var regExp = new System.Text.RegularExpressions.Regex(@"^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*");
+        var match = regExp.Match(link);
+        return (match.Success && match.Groups[7].Value.Length == 11) ? $"https://www.youtube.com/embed/{match.Groups[7].Value}" : link;
+    }
+
+    bool IsImageLink(string link)
+    {
+        return link.EndsWith(".jpg", StringComparison.OrdinalIgnoreCase) ||
+               link.EndsWith(".jpeg", StringComparison.OrdinalIgnoreCase) ||
+               link.EndsWith(".png", StringComparison.OrdinalIgnoreCase) ||
+               link.EndsWith(".gif", StringComparison.OrdinalIgnoreCase);
+    }
+}
+
+<div class="mb-3">
+	@if (Model.Contains("youtube.com") || Model.Contains("youtu.be"))
+	{
+		<div class="embed-responsive embed-responsive-16by9">
+			<iframe class="mw-100"
+					width="560"
+					height="315"
+					src="@YTLinkToEmbeddedLink(Model)"
+					title="YouTube video player"
+					frameborder="0"
+					allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+					allowfullscreen>
+			</iframe>
+		</div>
+	}
+	else if (IsImageLink(Model))
+	{
+		<div class="embed-responsive">
+			<img src="@Model" alt="Embedded Image" class="img-fluid cursor-pointer mw-75 mh-200px" data-bs-toggle="modal" data-bs-target="#imageModal-@Model.GetHashCode()" />
+		</div>
+
+		@* Image Modal *@
+		<div class="modal fade" id="imageModal-@Model.GetHashCode()" tabindex="-1" aria-labelledby="imageModalLabel-@Model.GetHashCode()" aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="imageModalLabel-@Model.GetHashCode()">Image Preview</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<img src="@Model" alt="Embedded Image" class="img-fluid zoomable-image" style="cursor: zoom-in;" onclick="zoomImage(this)" />
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<a href="@Model" target="_blank">@Model</a>
+	}
+</div>
+
+
+<script>
+    function zoomImage(img) {
+        if (img.style.transform === "scale(2)") {
+            img.style.transform = "scale(1)";
+            img.style.cursor = "zoom-in";
+        } else {
+            img.style.transform = "scale(2)";
+            img.style.cursor = "zoom-out";
+        }
+    }
+</script>
+
+<style>
+    .zoomable-image {
+        transition: transform 0.25s ease;
+    }
+
+	.mw-75{
+		max-width: 75%;
+	}
+	
+	.mh-200px{
+		max-height: 200px;
+	}
+</style>
