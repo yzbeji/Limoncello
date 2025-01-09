@@ -363,6 +363,7 @@ namespace Limoncello.Controllers
             TempData["TaskId"] = comment.ProjectTaskId;
             return RedirectToAction("Show", new { id = projectId });
         }
+
         [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult RemoveComment([FromForm] int commentId) 
@@ -551,8 +552,14 @@ namespace Limoncello.Controllers
 
             if (ModelState.IsValid)
             {
-                db.ProjectTasks.Add(reqTask);
+                var task = db.ProjectTasks.Find(reqTask.Id);
+                task.Description = reqTask.Description;
+                task.Title = reqTask.Title;
+                task.StartDate = reqTask.StartDate;
+                task.DueDate = reqTask.DueDate;
+                task.Content = reqTask.Content;
                 db.SaveChanges();
+
                 TempData["message"] = "Task added successfully!";
                 TempData["messageType"] = "alert-success";
                 return RedirectToAction("Show", new { id = projectId });
