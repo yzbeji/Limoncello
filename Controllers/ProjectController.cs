@@ -621,7 +621,15 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
             }
 
-            var userId = _userManager.FindByEmailAsync(email).Result.Id; // todo check if it exists
+            var user = _userManager.FindByEmailAsync(email).Result;
+            if (user == null)
+            {
+                TempData["message"] = "User does not exist!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
+            }
+            string userId = user.Id;
+
             var userTask = new UserTask
             {
                 UserId = userId,
