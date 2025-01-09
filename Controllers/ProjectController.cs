@@ -417,6 +417,66 @@ namespace Limoncello.Controllers
         }
 
         [HttpPost]
+        public IActionResult EditTaskColumn([FromForm] TaskColumn reqTaskCol)
+        {
+            var taskCol = db.TaskColumns.Find(reqTaskCol.Id);
+            var userId = _userManager.GetUserId(User);
+            var project = db.Projects.Find(taskCol.ProjectId);
+
+            if (project.OrganizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+            }
+
+            if (ModelState.IsValid)
+            {
+                taskCol.Name = reqTaskCol.Name;
+                db.SaveChanges();
+                TempData["message"] = "Column edited successfully!";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+            }
+            else
+            {
+                TempData["message"] = "You must name the column!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+            }
+        }
+
+        [HttpPost]
+        public IActionResult DeleteTaskColumn(int columnId)
+        {
+            var taskCol = db.TaskColumns.Find(columnId);
+            var userId = _userManager.GetUserId(User);
+            var project = db.Projects.Find(taskCol.ProjectId);
+
+            if (project.OrganizerId != userId)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+            }
+
+            if (ModelState.IsValid)
+            {
+                db.TaskColumns.Remove(taskCol);
+                db.SaveChanges();
+                TempData["message"] = "Column added successfully!";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+            }
+            else
+            {
+                TempData["message"] = "You must name the column!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+            }
+        }
+
+        [HttpPost]
         public IActionResult AddTask([FromForm] ProjectTask reqTask)
         {
             var userId = _userManager.GetUserId(User);
@@ -554,7 +614,7 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Show", new { id = task.TaskColumn.ProjectId });
             }
 
-            var userId = _userManager.FindByEmailAsync(email).Result.Id;
+            var userId = _userManager.FindByEmailAsync(email).Result.Id; // todo check if it exists
             var userTask = new UserTask
             {
                 UserId = userId,

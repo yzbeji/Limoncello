@@ -259,5 +259,19 @@ body {
     cursor: pointer;
 }
 
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.fixed-width-container {
+    max-width: 300px;
+    width: 100%;
+}
+
+
 
 
