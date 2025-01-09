@@ -18,6 +18,7 @@ namespace Limoncello.Models
         public DateOnly? StartDate { get; set; }
         public DateOnly? DueDate { get; set; }
         public string? Content { get; set; }
+        public int? Index { get; set; }
         public int TaskColumnId { get; set; }
         public virtual TaskColumn? TaskColumn { get; set; }
         public virtual ICollection<Comment>? Comments { get; set; }

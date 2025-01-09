@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.Build.Execution;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
@@ -11,7 +12,22 @@ using System.Threading.Tasks;
 
 namespace Limoncello.Controllers
 {
-    public class ProjectController : Controller
+    public class UpdateTaskDisplayInfoRequest
+    {
+        public int taskId { get; set; }
+        public int oldIndex { get; set; }
+        public int newIndex { get; set; }
+        public int oldColumnId { get; set; }
+        public int newColumnId { get; set; }
+    }
+
+    public class UpdateTaskColumnDisplayInfoRequest
+    {
+        public int columnId { get; set; }
+        public int oldIndex { get; set; }
+        public int newIndex { get; set; }
+    }
+        public class ProjectController : Controller
     {
         private readonly ApplicationDbContext db;
         private readonly UserManager<ApplicationUser> _userManager;
@@ -55,14 +71,14 @@ namespace Limoncello.Controllers
         {
             string userId = _userManager.GetUserId(User);
             var project = db.Projects
-                                .Include(p => p.TaskColumns)
-                                .ThenInclude(tc => tc.ProjectTasks)
-                                .ThenInclude(c => c.Comments)
-                                .ThenInclude(u => u.User)
-                                .Include(p => p.TaskColumns)
-                                .ThenInclude(tc => tc.ProjectTasks)
-                                .ThenInclude(u => u.UserTasks)
-                                .ThenInclude(u => u.User)
+                                .Include(p => p.TaskColumns.OrderBy(tc => tc.Index))
+                                    .ThenInclude(tc => tc.ProjectTasks.OrderBy(pt => pt.Index))
+                                        .ThenInclude(c => c.Comments)
+                                            .ThenInclude(u => u.User)
+                                .Include(p => p.TaskColumns.OrderBy(tc => tc.Index))
+                                    .ThenInclude(tc => tc.ProjectTasks.OrderBy(pt => pt.Index))
+                                        .ThenInclude(u => u.UserTasks)
+                                            .ThenInclude(u => u.User)
                                 .Where(p => p.Id == id)
                                 .FirstOrDefault();
             var projectUsers = db.UserProjects
@@ -403,8 +419,11 @@ namespace Limoncello.Controllers
 
             if (ModelState.IsValid)
             {
+                reqTaskColumn.Index = db.TaskColumns.Where(tc => tc.ProjectId == reqTaskColumn.ProjectId).Count();
+
                 db.TaskColumns.Add(reqTaskColumn);
                 db.SaveChanges();
+
                 TempData["message"] = "Column added successfully!";
                 TempData["messageType"] = "alert-success";
                 return RedirectToAction("Show", new { id = reqTaskColumn.ProjectId });
@@ -461,20 +480,52 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Show", new { id = taskCol.ProjectId });
             }
 
-            if (ModelState.IsValid)
+            // make sure to keep indexes dense
+            foreach (var tc in db.TaskColumns.Where(tc => tc.Index > taskCol.Index && tc.ProjectId == taskCol.ProjectId))
             {
-                db.TaskColumns.Remove(taskCol);
+                tc.Index -= 1;
+            }
+
+            db.TaskColumns.Remove(taskCol);
+            db.SaveChanges();
+            TempData["message"] = "Column added successfully!";
+            TempData["messageType"] = "alert-success";
+            return RedirectToAction("Show", new { id = taskCol.ProjectId });
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost]
+        public IActionResult UpdateTaskColumnDisplayInfo([FromBody] UpdateTaskColumnDisplayInfoRequest req)
+        {
+            var column = db.TaskColumns.Find(req.columnId);
+
+            if (column == null)
+            {
+                return Json(new { success = false, message = "Task column not found" });
+            }
+
+            if (req.oldIndex < req.newIndex)
+            {
+                foreach (var tc in db.TaskColumns.Where(tc => tc.ProjectId == column.ProjectId && tc.Index > req.oldIndex && tc.Index <= req.newIndex))
+                {
+                    tc.Index -= 1;
+                }
+
+                column.Index = req.newIndex;
                 db.SaveChanges();
-                TempData["message"] = "Column added successfully!";
-                TempData["messageType"] = "alert-success";
-                return RedirectToAction("Show", new { id = taskCol.ProjectId });
             }
             else
             {
-                TempData["message"] = "You must name the column!";
-                TempData["messageType"] = "alert-danger";
-                return RedirectToAction("Show", new { id = taskCol.ProjectId });
+                foreach (var tc in db.TaskColumns.Where(tc => tc.ProjectId == column.ProjectId && tc.Index >= req.newIndex && tc.Index < req.oldIndex))
+                {
+                    tc.Index += 1;
+                }
+
+                column.Index = req.newIndex;
+                db.SaveChanges();
             }
+
+            return Json(new { success = true, message = "Column moved successfully!" });
         }
 
         [HttpPost]
@@ -507,6 +558,7 @@ namespace Limoncello.Controllers
             if (ModelState.IsValid)
             {
                 reqTask.Status = Models.TaskStatus.NotStarted;
+                reqTask.Index = db.ProjectTasks.Where(pt => pt.TaskColumnId == reqTask.TaskColumnId).Count();
 
                 db.ProjectTasks.Add(reqTask);
                 db.SaveChanges();
@@ -704,12 +756,69 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Index");
             }
 
-            db.ProjectTasks.Remove(db.ProjectTasks.Find(taskId));
+            // keep indexes dense
+            var task = db.ProjectTasks.Find(taskId);
+            foreach (var pt in db.ProjectTasks.Where(pt => pt.Index > task.Index && pt.TaskColumnId == task.TaskColumnId))
+            {
+                pt.Index -= 1;
+            }
+
+            db.ProjectTasks.Remove(task);
             db.SaveChanges();
 
             TempData["message"] = "Task deleted successfully!";
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Show", new { id = projectId});
+        }
+
+        [Authorize(Roles = "User,Admin")]
+        [HttpPost]
+        public IActionResult UpdateTaskDisplayInfo([FromBody] UpdateTaskDisplayInfoRequest req)
+        {
+            var task = db.ProjectTasks.Find(req.taskId);
+
+            if (task == null)
+            {
+                return Json(new { success = false, message = "Task not found" });
+            }
+
+            if (req.newColumnId == req.oldColumnId)
+            {
+                if (req.newIndex < req.oldIndex)
+                {
+                    foreach (var pt in db.ProjectTasks.Where(pt => pt.TaskColumnId == task.TaskColumnId && pt.Index >= req.newIndex && pt.Index < req.oldIndex))
+                    {
+                        pt.Index += 1;
+                    }
+                }
+                else
+                {
+                    foreach(var pt in db.ProjectTasks.Where(pt => pt.TaskColumnId == task.TaskColumnId && pt.Index <= req.newIndex && pt.Index > req.oldIndex))
+                    {
+                        pt.Index -= 1;
+                    }
+                }
+                
+                task.Index = req.newIndex;
+                db.SaveChanges();
+            }
+            else
+            {
+                foreach (var pt in db.ProjectTasks.Where(pt => pt.TaskColumnId == req.oldColumnId && pt.Index > req.oldIndex))
+                {
+                    pt.Index -= 1;
+                }
+                foreach (var pt in db.ProjectTasks.Where(pt => pt.TaskColumnId == req.newColumnId && pt.Index >= req.newIndex))
+                {
+                    pt.Index += 1;
+                }
+
+                task.TaskColumnId = req.newColumnId;
+                task.Index = req.newIndex;
+                db.SaveChanges();
+            }
+
+            return Json(new { success = true, message = "Task moved successfully" });
         }
     }
 }
