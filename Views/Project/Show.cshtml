@@ -184,21 +184,23 @@
                                         <p><strong>Content:</strong> @task.Content</p>
                                         <div class="d-flex justify-content-between">
                                             <p><strong>Assigned to: </strong></p>
-                                            <div class="dropdown">
-                                                <button class="dropdown-toggle border rounded shadow-sm" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    Add User
-                                                </button>
-                                                <div class="dropdown-menu p-1" aria-labelledby="addUserDropdown" style="width: 300px;">
-                                                    <form method="post" asp-action="AddUserToTask" asp-controller="Project">
-                                                        <input type="hidden" name="taskId" value="@task.Id" />
-                                                        <div class="form-group">
-                                                            <label for="email" class="ms-3 mt-2">User Email</label>
-                                                            <input type="email" class="form-control m-3 w-auto" name="email" required />
-                                                        </div>
-                                                        <button type="submit" class="dropdown-item btn m-3">Add User</button>
-                                                    </form>
+                                            @if (isOrganizer){
+                                                <div class="dropdown">
+                                                    <button class="dropdown-toggle border rounded shadow-sm" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                        Add User
+                                                    </button>
+                                                    <div class="dropdown-menu p-1" aria-labelledby="addUserDropdown" style="width: 300px;">
+                                                        <form method="post" asp-action="AddUserToTask" asp-controller="Project">
+                                                            <input type="hidden" name="taskId" value="@task.Id" />
+                                                            <div class="form-group">
+                                                                <label for="email" class="ms-3 mt-2">User Email</label>
+                                                                <input type="email" class="form-control m-3 w-auto" name="email" required />
+                                                            </div>
+                                                            <button type="submit" class="dropdown-item btn m-3">Add User</button>
+                                                        </form>
+                                                    </div>
                                                 </div>
-                                            </div>
+                                            }
                                         </div>
 
                                         <div class="d-flex">
@@ -500,6 +502,16 @@
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+    }
+
+    function editComment(commentId) {
+        document.getElementById(`comment-content-${commentId}`).classList.add('d-none');
+        document.getElementById(`edit-comment-form-${commentId}`).classList.remove('d-none');
+    }
+
+    function cancelEdit(commentId) {
+        document.getElementById(`comment-content-${commentId}`).classList.remove('d-none');
+        document.getElementById(`edit-comment-form-${commentId}`).classList.add('d-none');
     }
 </script>
 
