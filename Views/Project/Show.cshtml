@@ -1,7 +1,10 @@
 ﻿@model Limoncello.Models.Project
 
 @{
+    bool isOrganizerOrAdmin = ViewBag.IsOrganizerOrAdmin;
     bool isOrganizer = ViewBag.UserId == Model.OrganizerId;
+    bool isMember = ViewBag.IsMember;
+    bool isAdmin = ViewBag.IsAdmin;
 
     string GetStatusBorderColor(Limoncello.Models.TaskStatus? status)
     {
@@ -46,12 +49,12 @@
                 @Model.Name
             </span>
         </h1>
-        @if (isOrganizer)
+        @if (isOrganizerOrAdmin)
         {
             <div class="d-flex align-items-center justify-content-between">
                 <!-- Add Column Dropdown -->
                 <div class="dropdown me-3">
-                    <button class="btn btn-outline-secondary dropdown-toggle rounded-3 shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle rounded-3 shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="bi bi-plus-circle"></i> Add Column
                     </button>
                     <div class="dropdown-menu p-4" aria-labelledby="dropdownMenuButton" style="width: 340px; border-radius: 10px;">
@@ -61,26 +64,26 @@
                                 <label for="Name" class="form-label ms-2">Enter column's name</label>
                                 <input type="text" class="form-control mb-3" name="Name" required placeholder="" />
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Create</button>
+                            <button type="submit" class="dropdown-item btn btn-custom m-3">Create Column</button>
                         </form>
                     </div>
                 </div>
 
                 <!-- Settings Button -->
-                <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-outline-secondary rounded-3 shadow-sm">
+                <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary rounded-3 shadow-sm">
                     <i class="bi bi-gear-fill"></i> Settings
                 </a>
+                @if (isMember && !isOrganizer)
+                {
+                    <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
+                        <input type="hidden" name="projectId" value="@Model.Id" />
+                        <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger m-2">
+                            Leave Board
+                        </button>
+                    </form>
+                }
             </div>
 
-        }
-        else
-        {
-            <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
-                <input type="hidden" name="projectId" value="@Model.Id" />
-                <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger">
-                    Leave Board
-                </button>
-            </form>
         }
     </div>
     <div id="taskColumns" class="d-flex w-100 overflow-auto">
@@ -90,7 +93,7 @@
                 @* Title *@
                 <div class="card-body m-2 rounded border border-2 shadow-sm d-flex justify-content-between align-items-center p-3">
                     <span class="ellipsis fw-bold fs-5">@column.Name</span>
-                    @if (isOrganizer)
+                    @if (isOrganizerOrAdmin)
                     {
                         <div class="dropdown">
                             <!-- Options Button -->
@@ -130,7 +133,7 @@
                                                 <input type="text" class="form-control form-control-lg" name="Name" value="@column.Name" required />
                                             </div>
                                             <div class="d-flex justify-content-end">
-                                                <button type="submit" class="btn btn-outline-success px-4 py-2">Save Changes</button>
+                                                <button type="submit" class="btn btn-custom mt-3">Save Changes</button>
                                             </div>
                                         </form>
                                     </div>
@@ -205,7 +208,7 @@
                                         <div class="modal-header border-bottom-0 d-felx justify-content-between align-items-start">
                                             <h3 class="modal-title text-dark text-wrap" id="taskDetailsModalLabel-@task.Id">@task.Title</h3>
                                             <div class="d-flex justify-content-between">
-                                                @if(isOrganizer){
+                                                @if(isOrganizerOrAdmin){
                                                     <div class="dropdown">
                                                         <button class="border rounded shadow-sm" type="button" id="taskOptionsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                                                             <i class="bi bi-three-dots"></i>
@@ -273,7 +276,7 @@
                                             @* Assigned members *@
                                             <div class="d-flex justify-content-between">
                                                 <p><strong>Assigned to: </strong></p>
-                                                @if (isOrganizer)
+                                                @if (isOrganizerOrAdmin)
                                                 {
                                                     <div class="dropdown">
                                                         <button class="dropdown-toggle btn btn-outline-primary rounded-3 shadow-sm" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -307,7 +310,7 @@
                                                              aria-expanded="false" />
                                                         <ul class="dropdown-menu">
                                                             <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
-                                                            @if (isOrganizer)
+                                                            @if (isOrganizerOrAdmin)
                                                             {
                                                                 <li>
                                                                     <form asp-action="RemoveUserFromTask" asp-controller="Project">
@@ -374,19 +377,21 @@
                                                                             <input type="hidden" name="id" value="@comment.Id" />
                                                                             <textarea name="Content" class="form-control" rows="4">@comment.Content</textarea>
                                                                             <div class="mt-2 d-flex gap-2">
-                                                                                <button type="submit" class="btn btn-success btn-sm">Save</button>
-                                                                                <button type="button" class="btn btn-danger btn-sm" onclick="cancelEdit(@comment.Id)">Cancel</button>
+                                                                                <button type="submit" class="btn btn-custom btn-success btn-sm">Save</button>
+                                                                                <button type="button" class="btn btn-custom btn-danger btn-sm" onclick="cancelEdit(@comment.Id)">Cancel</button>
                                                                             </div>
                                                                         </form>
                                                                     </div>
                                                                 </div>
                                                             </div>
-                                                            @if (ViewBag.UserId == comment.UserId)
+                                                            @if (ViewBag.UserId == comment.UserId || isAdmin)
                                                             {
-                                                                <div class="ms-10 mt-2 text-start d-flex justify-content-start gap-2">
-                                                                    <button type="button" class="btn btn-warning btn-sm" onclick="editComment(@comment.Id)">
-                                                                        <i class="fas fa-edit"></i> Edit
-                                                                    </button>
+                                                                <div class="mt-2 text-start d-flex justify-content-end gap-2">
+                                                                    @if (ViewBag.UserId == comment.UserId){
+                                                                        <button type="button" class="btn btn-warning btn-sm" onclick="editComment(@comment.Id)">
+                                                                            <i class="fas fa-edit"></i> Edit
+                                                                        </button>
+                                                                    }
                                                                     <form method="post" asp-action="RemoveComment" asp-controller="Project" onsubmit="return confirm('Are you sure you want to delete this comment?')">
                                                                         <input type="hidden" name="commentId" value="@comment.Id" />
                                                                         <button type="submit" class="btn btn-danger btn-sm">
@@ -415,7 +420,7 @@
                                                     <label for="Content" class="font-weight-bold"></label>
                                                     <textarea id="Content" name="Content" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
                                                 </div>
-                                                <button type="submit" class="btn btn-outline-secondary mt-2">Add Comment</button>
+                                                <button type="submit" class="btn btn-custom btn-secondary mt-2">Add Comment</button>
                                             </form>
                                         </div>
                                     </div>
@@ -469,7 +474,7 @@
 
                                                 <!-- Save Button -->
                                                 <div class="d-flex justify-content-end">
-                                                    <button type="submit" class="btn btn-success px-4 py-2">Save Changes</button>
+                                                    <button type="submit" class="btn btn-custom btn-success px-4 py-2">Save Changes</button>
                                                 </div>
                                             </form>
                                         </div>
@@ -480,13 +485,13 @@
                         </div>
                     }
                 </div>
-                @if (isOrganizer)
+                @if (isOrganizerOrAdmin)
                 {
                     <div class="">
                         <button type="button"
                                 data-toggle="modal"
                                 data-target="#addTaskModal"
-                                class="btn btn-outline-secondary me-3"
+                                class="btn btn-custom btn-secondary me-3"
                                 onclick="updateTaskColIdOnForm(@column.Id)">
                             <i class="bi bi-plus-circle me-2"></i> Add Task
                         </button>
@@ -511,8 +516,8 @@
                 Are you sure you want to leave the board?
             </div>
             <div class="modal-footer flex-column">
-                <button type="button" class="btn btn-danger" onclick="submitLeaveBoardForm()">Leave</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-wide btn-danger" onclick="submitLeaveBoardForm()">Leave</button>
+                <button type="button" class="btn btn-custom btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
@@ -547,7 +552,7 @@
                         <label for="DueDate" class="font-weight-bold">Due Date</label>
                         <input type="date" class="form-control rounded-3 shadow-sm" name="DueDate" required />
                     </div>
-                    <button type="submit" class="btn btn-outline-secondary rounded-3 shadow-sm w-100 mt-3">Create</button>
+                    <button type="submit" class="btn btn-custom btn-secondary rounded-3 shadow-sm w-100 mt-3">Create</button>
                 </form>
             </div>
         </div>
