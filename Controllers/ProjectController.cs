@@ -390,13 +390,21 @@ namespace Limoncello.Controllers
             {
                 return RedirectToAction("Index");
             }
-
+            if (string.IsNullOrEmpty(comment.Content))
+            {
+                TempData["EmptyContent"] = true;
+                TempData["ShowModal"] = true;
+                TempData["TaskId"] = comment.ProjectTaskId;
+                return RedirectToAction("Show", new { id = projectId });
+            }
+            else
+            {
             db.Comments.Add(comment);
             db.SaveChanges();
-
             TempData["ShowModal"] = true;
             TempData["TaskId"] = comment.ProjectTaskId;
             return RedirectToAction("Show", new { id = projectId });
+        }
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -629,6 +637,8 @@ namespace Limoncello.Controllers
 
                 TempData["message"] = "Task edited successfully!";
                 TempData["messageType"] = "alert-success";
+                TempData["ShowModal"] = true;
+                TempData["TaskId"] = reqTask.Id;
                 return RedirectToAction("Show", new { id = projectId });
             }
             else
