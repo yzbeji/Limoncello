@@ -54,8 +54,8 @@
             <div class="d-flex align-items-center justify-content-between">
                 <!-- Add Column Dropdown -->
                 <div class="dropdown me-3">
-                    <button class="btn btn-secondary dropdown-toggle rounded-3 shadow-sm" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        <i class="bi bi-plus-circle"></i> Add Column
+                    <button class="btn btn-secondary dropdown-toggle rounded-3 shadow-sm d-flex align-items-center" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bi bi-plus-circle mb-1"></i> <span class="ms-2">Add Column</span>
                     </button>
                     <div class="dropdown-menu p-4" aria-labelledby="dropdownMenuButton" style="width: 340px; border-radius: 10px;">
                         <form method="post" asp-action="AddTaskColumn" asp-controller="Project">
@@ -70,15 +70,15 @@
                 </div>
 
                 <!-- Settings Button -->
-                <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary rounded-3 shadow-sm">
-                    <i class="bi bi-gear-fill"></i> Settings
+                <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary rounded-3 shadow-sm d-flex align-items-center">
+                    <i class="bi bi-gear-fill mb-1"></i> <span class="ms-2">Settings</span>
                 </a>
                 @if (isMember && !isOrganizer)
                 {
                     <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
                         <input type="hidden" name="projectId" value="@Model.Id" />
-                        <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger m-2">
-                            Leave Board
+                        <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger m-3 p-2">
+                            <span class="mb-2 h-100">Leave Board</span>
                         </button>
                     </form>
                 }
@@ -149,7 +149,7 @@
                       
                         <div id="task-@task.Id">
                             <div id="taskCard-@task.Id"
-                                 class="task-card card-body m-2 p-3 rounded shadow-sm border-0 bg-white position-relative cursor-pointer"
+                                 class="task-card card-body m-2 p-3 rounded shadow-sm border border-1 bg-white position-relative cursor-pointer"
                                  data-toggle="modal"
                                  data-target="#taskDetailsModal-@task.Id">
                                 <!-- Task Title & Status -->
@@ -279,8 +279,8 @@
                                                 @if (isOrganizerOrAdmin)
                                                 {
                                                     <div class="dropdown">
-                                                        <button class="dropdown-toggle btn btn-outline-primary rounded-3 shadow-sm" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                            <i class="bi bi-person-plus"></i> Add Partner
+                                                        <button class="dropdown-toggle btn btn-outline-primary rounded-3 shadow-sm d-flex align-items-center" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="bi bi-person-plus mb-1"></i><span class="ms-2">Add Partner</span>
                                                         </button>
                                                         <div class="dropdown-menu p-4" aria-labelledby="addUserDropdown" style="width: 320px; border-radius: 10px;">
                                                             <form method="post" asp-action="AddUserToTask" asp-controller="Project">
@@ -491,9 +491,9 @@
                         <button type="button"
                                 data-toggle="modal"
                                 data-target="#addTaskModal"
-                                class="btn btn-custom btn-secondary me-3"
+                                class="btn btn-custom btn-secondary me-3 d-flex align-items-center"
                                 onclick="updateTaskColIdOnForm(@column.Id)">
-                            <i class="bi bi-plus-circle me-2"></i> Add Task
+                            <i class="bi bi-plus-circle mb-1"></i> <span class="ms-2">Add Task</span>
                         </button>
                     </div>
                 }
