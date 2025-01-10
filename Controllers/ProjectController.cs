@@ -628,7 +628,7 @@ namespace Limoncello.Controllers
                 task.Content = reqTask.Content;
                 db.SaveChanges();
 
-                TempData["message"] = "Task added successfully!";
+                TempData["message"] = "Task edited successfully!";
                 TempData["messageType"] = "alert-success";
                 return RedirectToAction("Show", new { id = projectId });
             }
