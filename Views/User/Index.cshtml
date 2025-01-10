@@ -1,0 +1,65 @@
+﻿<partial name="TempMessagePartial" model="Model" />
+
+<div class="d-flex justify-content-between align-items-center mt-3">
+    <h1>Users Admin Panel</h1>
+</div>
+
+<hr />
+
+<div class="row mb-3">
+    <div class="col-12">
+        <input type="text" id="userSearch" class="form-control" placeholder="Search users..." onkeyup="filterUsers()" />
+    </div>
+</div>
+
+<div class="row" id="userList">
+    @foreach (var user in ViewBag.Users)
+    {
+        <div class="col-4 mb-4 user-card">
+            <a asp-controller="User" asp-action="Show" asp-route-id="@user.Id" class="card-link">
+                <div class="card h-100 w-100">
+                    <div class="card-body d-flex justify-content-between flex-column">
+                        <div>
+                            <p><i class="bi bi-envelope"></i> Email utilizator: @user.Email</p>
+
+                            @if (@user.FirstName != null)
+                            {
+                                <p><i class="bi bi-person"> </i> Nume utilizator: @user.FirstName</p>
+                            }
+
+                            @if (@user.LastName != null)
+                            {
+                                <p><i class="bi bi-person"> </i> Prenume utilizator: @user.LastName</p>
+                            }
+
+                            @if (@user.PhoneNumber != null)
+                            {
+                                <p><i class="bi bi-phone"></i> Telefon utilizator: @user.PhoneNumber</p>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </a>
+        </div>
+    }
+</div>
+
+<script>
+    function filterUsers() {
+        var input, filter, userList, userCards, card, i, txtValue;
+        input = document.getElementById('userSearch');
+        filter = input.value.toLowerCase();
+        userList = document.getElementById("userList");
+        userCards = userList.getElementsByClassName('user-card');
+
+        for (i = 0; i < userCards.length; i++) {
+            card = userCards[i];
+            txtValue = card.textContent || card.innerText;
+            if (txtValue.toLowerCase().indexOf(filter) > -1) {
+                userCards[i].style.display = "";
+            } else {
+                userCards[i].style.display = "none";
+            }
+        }
+    }
+</script>

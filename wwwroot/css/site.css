@@ -33,7 +33,7 @@ a:hover {
 .ms-10 {
     margin-left: 16.7rem;
 }
-.btn {
+.btn-custom {
     background-color: #F0F0F0;
     color: #121212;
     font-family: 'Poppins', sans-serif;
@@ -44,14 +44,24 @@ a:hover {
     border-color: black;
 }
 
-.btn:focus {
+.btn-wide {
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    padding: 8px 100px;
+    width: auto;
+    border: 1px;
+    border-color: black;
+}
+
+.btn-custom:focus {
     outline: none;
     box-shadow: none;
     color: black;
 }
 
-.btn:hover {
+.btn-custom:hover {
     color: black;
+    background-color: lightgrey;
 }
 
 .navbar {
