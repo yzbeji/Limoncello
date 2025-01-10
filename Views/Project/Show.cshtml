@@ -14,7 +14,7 @@
 
         return status switch
         {
-            Limoncello.Models.TaskStatus.NotStarted => "border-dark",
+            Limoncello.Models.TaskStatus.NotStarted => "border-danger",
             Limoncello.Models.TaskStatus.InProgress => "border-warning",
             Limoncello.Models.TaskStatus.Completed => "border-success",
             _ => "border-dark"
@@ -29,7 +29,7 @@
 
         return status switch
         {
-            Limoncello.Models.TaskStatus.NotStarted => "bg-dark",
+            Limoncello.Models.TaskStatus.NotStarted => "bg-danger",
             Limoncello.Models.TaskStatus.InProgress => "bg-warning",
             Limoncello.Models.TaskStatus.Completed => "bg-success",
             _ => "bg-dark"
@@ -146,10 +146,10 @@
                 <div id="tasks-@column.Id" class="col-md-4 flex-shrink-0 overflow-auto rounded" style="max-height:calc(65vh);">
                     @foreach (var task in column.ProjectTasks)
                     {
-                      
+                        var borderColor = GetStatusBorderColor(task.Status);
                         <div id="task-@task.Id">
                             <div id="taskCard-@task.Id"
-                                 class="task-card card-body m-2 p-3 rounded shadow-sm border border-1 bg-white position-relative cursor-pointer"
+                                 class="task-card card-body m-2 p-3 rounded shadow-sm border border-1 @borderColor bg-white position-relative cursor-pointer"
                                  data-toggle="modal"
                                  data-target="#taskDetailsModal-@task.Id">
                                 <!-- Task Title & Status -->
@@ -164,12 +164,12 @@
                                             }
                                         case Limoncello.Models.TaskStatus.NotStarted:
                                             {
-                                                <span id="show-status-@task.Id" class="show-status badge rounded-pill status-badge" style="color: red">Not started</span>
+                                                <span id="show-status-@task.Id" class="show-status badge rounded-pill status-badge" style="color: red">Not Started</span>
                                                 break;
                                             }
                                         case Limoncello.Models.TaskStatus.InProgress:
                                             {
-                                                <span id="show-status-@task.Id" class="show-status badge rounded-pill status-badge" style="color: darkgoldenrod">In progess</span>
+                                                <span id="show-status-@task.Id" class="show-status badge rounded-pill status-badge" style="color: darkgoldenrod">In Progress</span>
                                                 break;
                                             }
                                     }
@@ -605,15 +605,15 @@
 
                 var status = formData.get("Status");
                 var statusSquare = document.getElementById("taskStatusColor-" + taskId);
-                statusSquare.classList.remove("bg-dark", "bg-warning", "bg-success");
+                statusSquare.classList.remove("bg-danger", "bg-warning", "bg-success");
 
                 var taskCard = document.getElementById("taskCard-" + taskId);
-                taskCard.classList.remove("border-dark", "border-warning", "border-danger");
+                taskCard.classList.remove("border-danger", "border-warning", "border-danger");
 
                 switch (status) {
                     case "NotStarted":
-                        statusSquare.classList.add("bg-dark");
-                        taskCard.classList.add("border-dark");
+                        statusSquare.classList.add("bg-danger");
+                        taskCard.classList.add("border-danger");
                         break;
                     case "InProgress":
                         statusSquare.classList.add("bg-warning");
