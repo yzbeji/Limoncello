@@ -42,9 +42,9 @@
 <div class="mt-3 h-100">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="d-flex align-items-center my-4">
-            <a asp-action="Index" asp-controller="Project" class="btn btn-outline-secondary me-3" style="text-decoration: none;">
+            <button onclick="history.back()" class="btn btn-outline-secondary me-3" style="text-decoration: none;">
                 ←
-            </a>
+            </button>
             <span class="flex-grow-1 text-center" style="font-weight: bold; font-size: 2rem;">
                 @Model.Name
             </span>
@@ -54,7 +54,7 @@
             <div class="d-flex align-items-center justify-content-between">
                 <!-- Add Column Dropdown -->
                 <div class="dropdown me-3">
-                    <button class="btn btn-secondary dropdown-toggle rounded-3 shadow-sm d-flex align-items-center" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button class="btn btn-secondary dropdown-toggle rounded-3 shadow-sm d-flex align-items-center ms-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="bi bi-plus-circle mb-1"></i> <span class="ms-2">Add Column</span>
                     </button>
                     <div class="dropdown-menu p-4" aria-labelledby="dropdownMenuButton" style="width: 340px; border-radius: 10px;">

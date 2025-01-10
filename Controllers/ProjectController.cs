@@ -44,8 +44,6 @@ namespace Limoncello.Controllers
             _roleManager = roleManager;
         }
 
-        private readonly ILogger<HomeController> _logger;
-
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
@@ -54,6 +52,7 @@ namespace Limoncello.Controllers
                                .Where(up => up.UserId == userId)
                                .Select(up => up.Project)
                                .ToList();
+
             ViewBag.IsEmpty = false;
             if (userProjects == null)
             {
@@ -833,6 +832,23 @@ namespace Limoncello.Controllers
             }
 
             return Json(new { success = true, message = "Task moved successfully" });
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult ProjectsPannel()
+        {
+            var projects = db.Projects.ToList();
+            if (projects == null)
+            {
+                ViewBag.IsEmpty = true;
+            }
+            else
+            {
+                ViewBag.IsEmpty = false;
+                ViewBag.Projects = projects;
+            }
+
+            return View();
         }
 
         private bool isAdmin(string? userId)
