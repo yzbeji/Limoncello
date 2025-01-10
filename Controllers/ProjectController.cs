@@ -46,62 +46,6 @@ namespace Limoncello.Controllers
 
         private readonly ILogger<HomeController> _logger;
 
-        private bool isAdmin(string? userId)
-        {
-            if (userId == null)
-            {
-                return false;
-            }
-
-            var user = _userManager.FindByIdAsync(userId).Result;
-            return _userManager.IsInRoleAsync(user, "Admin").Result;
-        }
-
-        private bool isOrganizerOrAdmin(int? projectId, bool showMessage = true)
-        {
-            if (projectId == null)
-            {
-                return false;
-            }
-
-            var project = db.Projects.Find(projectId);
-            var userId = _userManager.GetUserId(User);
-            if (project == null || userId == null)
-            {
-                return false;
-            }
-            var isOrganizer = userId == project.OrganizerId || isAdmin(userId);
-
-            if (isOrganizer == false && showMessage == true)
-            {
-                TempData["message"] = "You are not the organizer of this project";
-                TempData["messageType"] = "alert-danger";
-            }
-
-            return isOrganizer;
-        }
-
-        private bool isMember(int? projectId, bool showMessage = true)
-        {
-            if (projectId == null)
-            {
-                return false;
-            }
-
-            var projectUsers = db.UserProjects.Where(up => up.ProjectId == projectId).Select(up => up.UserId).ToList();
-            var userId = _userManager.GetUserId(User);
-            var isMember = projectUsers.Contains(userId);
-
-            if (!isMember && showMessage == true)
-            {
-                TempData["message"] = "You are not part of the board!";
-                TempData["messageType"] = "alert-danger";
-            }
-
-            return isMember;
-        }
-
-        // TODO: require authorization
         [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
@@ -122,7 +66,7 @@ namespace Limoncello.Controllers
             return View();
         }
 
-        // TODO: require authorization
+        [Authorize(Roles = "User,Admin")]
         public IActionResult Show(int? id)
         {
             if (!isAdmin(_userManager.GetUserId(User)) && !isMember(id))
@@ -208,8 +152,8 @@ namespace Limoncello.Controllers
             }
         }
 
-        [HttpPost]
         [Authorize(Roles = "User,Admin")]
+        [HttpPost]
         public IActionResult SaveEditedComment([FromForm]int id, [FromForm]string? content)
         {
             var comment = db.Comments.FirstOrDefault(c => c.Id == id);
@@ -259,6 +203,7 @@ namespace Limoncello.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddMemberToProject(int projectId, string userEmail)
         {
@@ -313,6 +258,7 @@ namespace Limoncello.Controllers
             return RedirectToAction("Settings", new { id = projectId });
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult RemoveMember(int projectId, string userId)
         {
@@ -347,6 +293,7 @@ namespace Limoncello.Controllers
             return RedirectToAction("Settings", new { id = projectId });
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult LeaveBoard(int projectId)
         {
@@ -373,8 +320,8 @@ namespace Limoncello.Controllers
             return RedirectToAction("Index");
         }
 
-        [HttpPost]
         [Authorize(Roles = "User,Admin")]
+        [HttpPost]
         public IActionResult Delete(int projectId)
         {
             if (!isOrganizerOrAdmin(projectId))
@@ -399,6 +346,7 @@ namespace Limoncello.Controllers
             return RedirectToAction("Index");
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult MakeOrganizer(int projectId, string userId)
         {
@@ -487,6 +435,7 @@ namespace Limoncello.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddTaskColumn([FromForm] TaskColumn reqTaskColumn)
         {
@@ -514,6 +463,7 @@ namespace Limoncello.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditTaskColumn([FromForm] TaskColumn reqTaskColumn)
         {
@@ -543,6 +493,7 @@ namespace Limoncello.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult DeleteTaskColumn(int columnId)
         {
@@ -606,6 +557,7 @@ namespace Limoncello.Controllers
             return Json(new { success = true, message = "Column moved successfully!" });
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddTask([FromForm] ProjectTask reqTask)
         {
@@ -646,6 +598,7 @@ namespace Limoncello.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditTask([FromForm] ProjectTask reqTask)
         {
@@ -688,6 +641,7 @@ namespace Limoncello.Controllers
             }
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditTaskStatus([FromForm] ProjectTask reqTask)
         {
@@ -720,6 +674,7 @@ namespace Limoncello.Controllers
             return Json(new { success = true, message = "Task status updated!" });
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddUserToTask(int taskId, string email)
         {
@@ -757,6 +712,7 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId });
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult RemoveUserFromTask(int taskId, string userId)
         {
@@ -789,6 +745,7 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId });
         }
 
+        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult DeleteTask(int taskId)
         {
@@ -876,6 +833,61 @@ namespace Limoncello.Controllers
             }
 
             return Json(new { success = true, message = "Task moved successfully" });
+        }
+
+        private bool isAdmin(string? userId)
+        {
+            if (userId == null)
+            {
+                return false;
+            }
+
+            var user = _userManager.FindByIdAsync(userId).Result;
+            return _userManager.IsInRoleAsync(user, "Admin").Result;
+        }
+
+        private bool isOrganizerOrAdmin(int? projectId, bool showMessage = true)
+        {
+            if (projectId == null)
+            {
+                return false;
+            }
+
+            var project = db.Projects.Find(projectId);
+            var userId = _userManager.GetUserId(User);
+            if (project == null || userId == null)
+            {
+                return false;
+            }
+            var isOrganizer = userId == project.OrganizerId || isAdmin(userId);
+
+            if (isOrganizer == false && showMessage == true)
+            {
+                TempData["message"] = "You are not the organizer of this project";
+                TempData["messageType"] = "alert-danger";
+            }
+
+            return isOrganizer;
+        }
+
+        private bool isMember(int? projectId, bool showMessage = true)
+        {
+            if (projectId == null)
+            {
+                return false;
+            }
+
+            var projectUsers = db.UserProjects.Where(up => up.ProjectId == projectId).Select(up => up.UserId).ToList();
+            var userId = _userManager.GetUserId(User);
+            var isMember = projectUsers.Contains(userId);
+
+            if (!isMember && showMessage == true)
+            {
+                TempData["message"] = "You are not part of the board!";
+                TempData["messageType"] = "alert-danger";
+            }
+
+            return isMember;
         }
     }
 }
