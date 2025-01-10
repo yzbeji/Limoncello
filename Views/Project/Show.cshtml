@@ -42,7 +42,7 @@
 <div class="mt-3 h-100">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="d-flex align-items-center my-4">
-            <button onclick="history.back()" class="btn btn-outline-secondary me-3" style="text-decoration: none;">
+            <button onclick="goBack()" class="btn btn-outline-secondary me-3" style="text-decoration: none;">
                 ←
             </button>
             <span class="flex-grow-1 text-center" style="font-weight: bold; font-size: 2rem;">
@@ -185,7 +185,7 @@
                                     </div>
                                 </div>
                                 <!-- Assigned Users Avatars -->
-                                <div class="d-flex align-items-center mt-3">
+                                <div class="d-flex align-items-center mt-3 overflow-hidden">
                                     @foreach (var userTask in task.UserTasks)
                                     {
                                         var user = userTask.User;
@@ -236,6 +236,7 @@
                                                 <div id="taskStatusColor-@task.Id" class="@GetStatusBackgroundSquare(task.Status) border me-2 mt-1 mb-3 p-2"></div>
 											    <form id="taskStatus-@task.Id" method="post" asp-action="EditTaskStatus" asp-controller="Project">
 												    <input type="hidden" name="Id" value="@task.Id" />
+                                                    <input type="hidden" name="TaskColumnId" value="@task.TaskColumnId" />
 												    <select name="Status" class="form-select w-auto" onchange="updateTaskStatus(@task.Id); changeStatus(this.value, @task.Id)">
                                                         <option value="NotStarted" selected="@(task.Status == Limoncello.Models.TaskStatus.NotStarted)">Not Started</option>
                                                         <option value="InProgress" selected="@(task.Status == Limoncello.Models.TaskStatus.InProgress)">In Progress</option>
@@ -748,6 +749,28 @@
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+    }
+
+    function goBack() {
+        let currentUrl = window.location.href;
+        let previousUrl = document.referrer;
+
+        if (window.history.length > 1) {
+            if (previousUrl && previousUrl !== currentUrl) {
+                window.history.back();
+            } else {
+                let steps = -1;
+                while (steps > -window.history.length && document.referrer === currentUrl) {
+                    window.history.go(steps);
+                    steps--;
+                }
+                if (document.referrer === currentUrl) {
+                    window.location.href = '/';
+                }
+            }
+        } else {
+            window.location.href = '/';
+        }
     }
 </script>
 
