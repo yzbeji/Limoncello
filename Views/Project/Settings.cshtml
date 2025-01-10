@@ -12,7 +12,7 @@
     <hr />
 
     @* Board name *@
-    <form method="post" asp-action="Edit" asp-controller="Project">
+    <form method="post" asp-action="EditProject" asp-controller="Project">
         <div asp-validation-summary="ModelOnly" class="text-danger"></div>
         <div class="form-group">
             <input asp-for="Id" type="hidden" value="@Model.Id"/>
@@ -40,7 +40,7 @@
                         </button>
                     </div>
                     <div class="modal-body">
-                        <form method="post" action="/Project/AddMember">
+                        <form method="post" action="/Project/AddMemberToProject">
                             <input id="projectId" name="ProjectId" class="form-control" type="hidden" value="@Model.Id" />
                             <div class="form-group">
                                 <label type="text" name="userEmail" class="form-label">User Email</label>
@@ -73,7 +73,7 @@
                 }
                 <ul class="dropdown-menu">
                     <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
-                    @if (userProject.UserId != ViewBag.UserId)
+                    @if (userProject.UserId != Model.OrganizerId)
                     {
                         <li>
                             <form id="changeOrgForm_@userProject.UserId" asp-action="MakeOrganizer" asp-controller="Project">
