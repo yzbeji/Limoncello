@@ -26,6 +26,13 @@ a:hover {
   color: #3700b3;  
 }
 
+.list-group-item {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+.ms-10 {
+    margin-left: 16.7rem;
+}
 .btn {
     background-color: #F0F0F0;
     color: #121212;
@@ -247,6 +254,24 @@ body {
     text-decoration: none;
     color: inherit;
 }
+
+.cursor-pointer{
+    cursor: pointer;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.fixed-width-container {
+    max-width: 300px;
+    width: 100%;
+}
+
 
 
 
