@@ -476,13 +476,13 @@
                                                 <!-- Start Date Input -->
                                                 <div class="form-group mb-3">
                                                     <label for="StartDate" class="form-label">Start Date</label>
-                                                    <input type="date" class="form-control form-control-lg" name="StartDate" value="@task.StartDate?.ToString("yyyy-MM-dd")" required />
+                                                    <input id="StartDateEditForm-@task.Id" type="date" class="form-control form-control-lg" name="StartDate" required onchange="updateDueDateMinEdit(@task.Id)" value="@task.StartDate?.ToString("yyyy-MM-dd")" />
                                                 </div>
 
                                                 <!-- Due Date Input -->
                                                 <div class="form-group mb-3">
                                                     <label for="DueDate" class="form-label">Due Date</label>
-                                                    <input type="date" class="form-control form-control-lg" name="DueDate" value="@task.DueDate?.ToString("yyyy-MM-dd")" required />
+                                                    <input id="DueDateEditForm-@task.Id" type="date" class="form-control form-control-lg" name="DueDate" value="@task.DueDate?.ToString("yyyy-MM-dd")" required min="@task.StartDate?.ToString("yyyy-MM-dd")" />
                                                 </div>
 
                                                 <!-- Save Button -->
