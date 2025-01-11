@@ -310,7 +310,13 @@
                                                              data-bs-toggle="dropdown"
                                                              aria-expanded="false" />
                                                         <ul class="dropdown-menu">
-                                                            <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
+                                                            <li><span class="dropdown-item-text"><strong>@user.FirstName @user.LastName</strong></span></li>
+                                                            @if (@user.Department != null){
+                                                                <li><span class="dropdown-item-text"><strong>Department:</strong> @user.Department</span></li>
+                                                            }
+                                                            @if (user.JobTitle != null){
+                                                                <li><span class="dropdown-item-text"><strong>Job Title:</strong> @user.JobTitle</span></li>
+                                                            }
                                                             @if (isOrganizerOrAdmin)
                                                             {
                                                                 <li>
