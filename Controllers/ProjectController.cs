@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.Build.Execution;
 using Microsoft.EntityFrameworkCore;
@@ -399,12 +400,12 @@ namespace Limoncello.Controllers
             }
             else
             {
-            db.Comments.Add(comment);
-            db.SaveChanges();
-            TempData["ShowModal"] = true;
-            TempData["TaskId"] = comment.ProjectTaskId;
-            return RedirectToAction("Show", new { id = projectId });
-        }
+                db.Comments.Add(comment);
+                db.SaveChanges();
+                TempData["ShowModal"] = true;
+                TempData["TaskId"] = comment.ProjectTaskId;
+                return RedirectToAction("Show", new { id = projectId });
+            }
         }
 
         [Authorize(Roles = "User,Admin")]
@@ -578,12 +579,6 @@ namespace Limoncello.Controllers
             {
                 return RedirectToAction("Index");
             }
-
-            if (reqTask.StartDate.HasValue && reqTask.DueDate.HasValue && reqTask.StartDate.Value > reqTask.DueDate.Value)
-            {
-                ModelState.AddModelError("DueDate", "Due Date must be after Start Date.");
-            }
-
             if (ModelState.IsValid)
             {
                 reqTask.Status = Models.TaskStatus.NotStarted;
@@ -619,12 +614,6 @@ namespace Limoncello.Controllers
             {
                 return RedirectToAction("Index");
             }
-
-            if (reqTask.StartDate.HasValue && reqTask.DueDate.HasValue && reqTask.StartDate.Value > reqTask.DueDate.Value)
-            {
-                ModelState.AddModelError("DueDate", "Due Date must be after Start Date.");
-            }
-
             if (ModelState.IsValid)
             {
                 var task = db.ProjectTasks.Find(reqTask.Id);

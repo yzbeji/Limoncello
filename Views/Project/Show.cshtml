@@ -415,7 +415,19 @@
                                                     }
                                                 </div>
                                             </div>
+                                            @if ((TempData["EmptyContent"] as bool?) == true)
+                                            {
+                                                <div id="errorAlert" class="alert alert-danger alert-dismissible fade show hidden" role="alert">
+                                                    <strong>Oops!</strong> Please write something! Are you drunk?
+               
+                                                </div>
+                                            }
+                                            else
+                                            {
+                                                
+                                            }
                                             <form method="post" asp-action="AddComment" asp-controller="Project" class="mt-4">
+     
                                                 <input type="hidden" name="ProjectTaskId" value="@task.Id" id="projectTaskId" />
                                                 <div class="form-group">
                                                     <label for="Content" class="font-weight-bold"></label>
@@ -546,12 +558,16 @@
                         <textarea class="form-control rounded-3 shadow-sm" name="Description" rows="4" required></textarea>
                     </div>
                     <div class="form-group mb-4">
+                        <label for="Content" class="form-label">Content</label>
+                        <textarea class="form-control form-control-lg" name="Content" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group mb-4">
                         <label for="StartDate" class="font-weight-bold">Start Date</label>
-                        <input type="date" class="form-control rounded-3 shadow-sm" name="StartDate" required />
+                        <input id="StartDate" type="date" class="form-control rounded-3 shadow-sm" name="StartDate" required onchange="updateDueDateMin()"/>
                     </div>
                     <div class="form-group mb-4">
                         <label for="DueDate" class="font-weight-bold">Due Date</label>
-                        <input type="date" class="form-control rounded-3 shadow-sm" name="DueDate" required />
+                        <input id="DueDate" type="date" class="form-control rounded-3 shadow-sm" name="DueDate" required />
                     </div>
                     <button type="submit" class="btn btn-custom btn-secondary rounded-3 shadow-sm w-100 mt-3">Create</button>
                 </form>

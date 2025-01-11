@@ -6,6 +6,7 @@ namespace Limoncello.Models
     {
         [Key]
         public int Id { get; set; }
+        [Required(ErrorMessage = "Please name it")]
         public string? Name { get; set; }
         public int? Index { get; set; }
         public int ProjectId { get; set; }
