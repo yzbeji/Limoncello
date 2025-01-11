@@ -4,6 +4,7 @@ using Limoncello.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Limoncello.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250105093604_AddProjectTasksFields")]
+    partial class AddProjectTasksFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -107,35 +110,6 @@ namespace Limoncello.Data.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Limoncello.Models.Comment", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Content")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("CreatedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("ProjectTaskId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ProjectTaskId");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("Comments");
-                });
-
             modelBuilder.Entity("Limoncello.Models.Project", b =>
                 {
                     b.Property<int>("Id")
@@ -176,9 +150,6 @@ namespace Limoncello.Data.Migrations
                     b.Property<DateOnly?>("DueDate")
                         .HasColumnType("date");
 
-                    b.Property<int?>("Index")
-                        .HasColumnType("int");
-
                     b.Property<DateOnly?>("StartDate")
                         .HasColumnType("date");
 
@@ -205,9 +176,6 @@ namespace Limoncello.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("Index")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -240,21 +208,6 @@ namespace Limoncello.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserProjects");
-                });
-
-            modelBuilder.Entity("Limoncello.Models.UserTask", b =>
-                {
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int>("TaskId")
-                        .HasColumnType("int");
-
-                    b.HasKey("UserId", "TaskId");
-
-                    b.HasIndex("TaskId");
-
-                    b.ToTable("UserTasks");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -394,23 +347,6 @@ namespace Limoncello.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Limoncello.Models.Comment", b =>
-                {
-                    b.HasOne("Limoncello.Models.ProjectTask", "ProjectTask")
-                        .WithMany("Comments")
-                        .HasForeignKey("ProjectTaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Limoncello.Models.ApplicationUser", "User")
-                        .WithMany("Comments")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("ProjectTask");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("Limoncello.Models.ProjectTask", b =>
                 {
                     b.HasOne("Limoncello.Models.TaskColumn", "TaskColumn")
@@ -448,25 +384,6 @@ namespace Limoncello.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Project");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Limoncello.Models.UserTask", b =>
-                {
-                    b.HasOne("Limoncello.Models.ProjectTask", "Task")
-                        .WithMany("UserTasks")
-                        .HasForeignKey("TaskId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Limoncello.Models.ApplicationUser", "User")
-                        .WithMany("UserTasks")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Task");
 
                     b.Navigation("User");
                 });
@@ -524,11 +441,7 @@ namespace Limoncello.Data.Migrations
 
             modelBuilder.Entity("Limoncello.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("UserProjects");
-
-                    b.Navigation("UserTasks");
                 });
 
             modelBuilder.Entity("Limoncello.Models.Project", b =>
@@ -536,13 +449,6 @@ namespace Limoncello.Data.Migrations
                     b.Navigation("TaskColumns");
 
                     b.Navigation("UserProjects");
-                });
-
-            modelBuilder.Entity("Limoncello.Models.ProjectTask", b =>
-                {
-                    b.Navigation("Comments");
-
-                    b.Navigation("UserTasks");
                 });
 
             modelBuilder.Entity("Limoncello.Models.TaskColumn", b =>

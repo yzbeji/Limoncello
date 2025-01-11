@@ -1,45 +1,503 @@
 ﻿@model Limoncello.Models.Project
 
+@{
+    bool isOrganizerOrAdmin = ViewBag.IsOrganizerOrAdmin;
+    bool isOrganizer = ViewBag.UserId == Model.OrganizerId;
+    bool isMember = ViewBag.IsMember;
+    bool isAdmin = ViewBag.IsAdmin;
+
+    string GetStatusBorderColor(Limoncello.Models.TaskStatus? status)
+    {
+        if (status == null){
+            return "border-dark";
+        }
+
+        return status switch
+        {
+            Limoncello.Models.TaskStatus.NotStarted => "border-danger",
+            Limoncello.Models.TaskStatus.InProgress => "border-warning",
+            Limoncello.Models.TaskStatus.Completed => "border-success",
+            _ => "border-dark"
+        };
+    }
+
+    string GetStatusBackgroundSquare(Limoncello.Models.TaskStatus? status)
+    {
+        if (status == null){
+            return "bg-dark";
+        }
+
+        return status switch
+        {
+            Limoncello.Models.TaskStatus.NotStarted => "bg-danger",
+            Limoncello.Models.TaskStatus.InProgress => "bg-warning",
+            Limoncello.Models.TaskStatus.Completed => "bg-success",
+            _ => "bg-dark"
+        };
+    }
+}
+
 <partial name="TempMessagePartial" model="Model" />
 
-<div class="mt-3">
+<div class="mt-3 h-100">
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1>
-            <a asp-action="Index" asp-controller="Project" class="no-underline-no-colour">
+        <h1 class="d-flex align-items-center my-4">
+            <button onclick="goBack()" class="btn btn-outline-secondary me-3" style="text-decoration: none;">
                 ←
-            </a>
-            @Model.Name
+            </button>
+            <span class="flex-grow-1 text-center" style="font-weight: bold; font-size: 2rem;">
+                @Model.Name
+            </span>
         </h1>
-        @if (ViewBag.UserId == Model.OrganizerId){
-            <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary">Settings</a>
-        }
-        else{
-            <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
-                <input type="hidden" name="projectId" value="@Model.Id" />
-                <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger">
-                    Leave Board
-                </button>
-            </form>
-        }
-    </div>
-    <div class="row">
-        @foreach(var column in Model.TaskColumns)  @* Design is not yet in final form! *@
+        @if (isOrganizerOrAdmin)
         {
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <div class="card-header">
-                        Column Name: @column.Name
-                    </div>
-                    <div class="card-body">
-                        @foreach (var task in column.ProjectTasks)
-                        {
-                            <div class="mb-2">
-                                <h5>Task Name: @task.Name</h5>
-                                <p>Task Description: @task.Description</p>
+            <div class="d-flex align-items-center justify-content-between">
+                <!-- Add Column Dropdown -->
+                <div class="dropdown me-3">
+                    <button class="btn btn-secondary dropdown-toggle rounded-3 shadow-sm d-flex align-items-center ms-2" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <i class="bi bi-plus-circle mb-1"></i> <span class="ms-2">Add Column</span>
+                    </button>
+                    <div class="dropdown-menu p-4" aria-labelledby="dropdownMenuButton" style="width: 340px; border-radius: 10px;">
+                        <form method="post" asp-action="AddTaskColumn" asp-controller="Project">
+                            <input type="hidden" name="ProjectId" value="@Model.Id" />
+                            <div class="form-group">
+                                <label for="Name" class="form-label ms-2">Enter column's name</label>
+                                <input type="text" class="form-control mb-3" name="Name" required placeholder="" />
                             </div>
-                        }
+                            <button type="submit" class="dropdown-item btn btn-custom m-3">Create Column</button>
+                        </form>
                     </div>
                 </div>
+
+                <!-- Settings Button -->
+                <a asp-action="Settings" asp-controller="Project" asp-route-id="@Model.Id" class="btn btn-secondary rounded-3 shadow-sm d-flex align-items-center">
+                    <i class="bi bi-gear-fill mb-1"></i> <span class="ms-2">Settings</span>
+                </a>
+                @if (isMember && !isOrganizer)
+                {
+                    <form id="leaveBoardForm" method="post" asp-action="LeaveBoard" asp-controller="Project">
+                        <input type="hidden" name="projectId" value="@Model.Id" />
+                        <button type="button" data-toggle="modal" data-target="#leaveBoardModal" class="btn btn-danger m-3 p-2">
+                            <span class="mb-2 h-100">Leave Board</span>
+                        </button>
+                    </form>
+                }
+            </div>
+
+        }
+    </div>
+    <div id="taskColumns" class="d-flex w-100 overflow-auto">
+        @foreach (var column in Model.TaskColumns)
+        {
+            <div id="column-@column.Id" class="me-4 rounded-3">
+                @* Title *@
+                <div class="card-body m-2 rounded border border-2 shadow-sm d-flex justify-content-between align-items-center p-3">
+                    <span class="ellipsis fw-bold fs-5">@column.Name</span>
+                    @if (isOrganizerOrAdmin)
+                    {
+                        <div class="dropdown">
+                            <!-- Options Button -->
+                            <button class="btn p-0 border-0 bg-transparent" type="button" id="columnOptionsDropdown-@column.Id" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="Options">
+                                <i class="bi bi-three-dots fs-4 text-dark"></i>
+                            </button>
+
+                            <!-- Dropdown Menu -->
+                            <div class="dropdown-menu dropdown-menu-end border-0 p-3" aria-labelledby="columnOptionsDropdown-@column.Id" style="min-width: 180px;">
+                                <button class="dropdown-item d-flex align-items-center" type="button" data-bs-toggle="modal" data-bs-target="#editColumnModal-@column.Id">
+                                    <i class="bi bi-pencil-square me-2"></i> Edit
+                                </button>
+                                <form method="post" asp-action="DeleteTaskColumn" asp-controller="Project" onsubmit="return confirm('Are you sure you want to delete this column?')">
+                                    <input type="hidden" name="columnId" value="@column.Id" />
+                                    <button type="submit" class="dropdown-item text-danger d-flex align-items-center">
+                                        <i class="bi bi-trash-fill me-2"></i> Delete
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+
+                        @* Edit Column Modal *@
+                        <div class="modal fade" id="editColumnModal-@column.Id" tabindex="-1" role="dialog" aria-labelledby="editColumnModalLabel-@column.Id" aria-hidden="true">
+                            <div class="modal-dialog" role="document">
+                                <div class="modal-content rounded-3 shadow-lg">
+                                    <!-- Modal Header -->
+                                    <div class="modal-header bg-white text-black">
+                                        <h5 class="modal-title" id="editColumnModalLabel-@column.Id">Edit column</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <!-- Modal Body -->
+                                    <div class="modal-body">
+                                        <form method="post" asp-action="EditTaskColumn" asp-controller="Project">
+                                            <input type="hidden" name="Id" value="@column.Id" />
+                                            <div class="form-group mb-3">
+                                                <label for="Name" class="form-label">New column name</label>
+                                                <input type="text" class="form-control form-control-lg" name="Name" value="@column.Name" required />
+                                            </div>
+                                            <div class="d-flex justify-content-end">
+                                                <button type="submit" class="btn btn-custom mt-3">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+                @* Tasks *@
+                <div id="tasks-@column.Id" class="col-md-4 flex-shrink-0 overflow-auto rounded" style="max-height:calc(65vh);">
+                    @foreach (var task in column.ProjectTasks)
+                    {
+                        var borderColor = GetStatusBorderColor(task.Status);
+                        <div id="task-@task.Id">
+                            <div id="taskCard-@task.Id"
+                                 class="task-card card-body m-2 p-3 rounded shadow-sm border border-1 @borderColor bg-white position-relative cursor-pointer"
+                                 data-toggle="modal"
+                                 data-target="#taskDetailsModal-@task.Id">
+                                <!-- Task Title & Status -->
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="task-title ellipsis mb-1">@task.Title</h5>
+                                    @switch (task.Status)
+                                    {
+                                        case Limoncello.Models.TaskStatus.Completed:
+                                            {
+                                                <span id="show-status-@task.Id" class="badge rounded-pill status-badge text-end" style="color: green">Completed</span>
+                                                break;
+                                            }
+                                        case Limoncello.Models.TaskStatus.NotStarted:
+                                            {
+                                                <span id="show-status-@task.Id" class="show-status badge rounded-pill status-badge" style="color: red">Not Started</span>
+                                                break;
+                                            }
+                                        case Limoncello.Models.TaskStatus.InProgress:
+                                            {
+                                                <span id="show-status-@task.Id" class="show-status badge rounded-pill status-badge" style="color: darkgoldenrod">In Progress</span>
+                                                break;
+                                            }
+                                    }
+                                </div>
+                                <!-- Task Progress Bar -->
+                                <div class="progress mt-3" style="height: 5px;">
+                                    <div id="progress-bar-@task.Id" class="progress-bar-animated"
+                                         role="progressbar"
+                                         style="background-color: @(task.Status == Limoncello.Models.TaskStatus.Completed ? "green" : (task.Status == Limoncello.Models.TaskStatus.InProgress ? "darkgoldenrod" : "red"));; width:@(task.Status == Limoncello.Models.TaskStatus.Completed ? "100%" : (task.Status == Limoncello.Models.TaskStatus.InProgress ? "50%" : "10%"));"
+                                         aria-valuenow="@(task.Status == Limoncello.Models.TaskStatus.Completed ? " 100" : "50")"
+                                         aria-valuemin="0"
+                                         aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <!-- Assigned Users Avatars -->
+                                <div class="d-flex align-items-center mt-3 overflow-hidden">
+                                    @foreach (var userTask in task.UserTasks)
+                                    {
+                                        var user = userTask.User;
+                                        var base64String = userTask.User.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+                                        <img class="avatar me-1"
+                                             src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                                             alt="Profile Picture"
+                                             style="width: 30px; height: 30px; border-radius: 50%;" />
+                                    }
+                                </div>
+                                <!-- Due Date -->
+                                <div class="d-flex justify-content-between mt-3">
+                                    <span class="text-muted small"><i class="bi bi-calendar"></i> Due: @task.DueDate?.ToString("MMM dd")</span>
+                                </div>
+                            </div>
+                            <div class="modal fade" id="taskDetailsModal-@task.Id" tabindex="-1" role="dialog" aria-labelledby="taskDetailsModalLabel-@task.Id" aria-hidden="true">
+                                <div class="modal-dialog modal-lg" role="document">
+                                    <div class="modal-content">
+                                        @* 3 dots menu *@
+                                        <div class="modal-header border-bottom-0 d-felx justify-content-between align-items-start">
+                                            <h3 class="modal-title text-dark text-wrap" id="taskDetailsModalLabel-@task.Id">@task.Title</h3>
+                                            <div class="d-flex justify-content-between">
+                                                @if(isOrganizerOrAdmin){
+                                                    <div class="dropdown">
+                                                        <button class="border rounded shadow-sm" type="button" id="taskOptionsDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="bi bi-three-dots"></i>
+                                                        </button>
+                                                        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="taskOptionsDropdown">
+                                                            <a class="dropdown-item" href="#" data-toggle="modal" data-target="#editTaskModal-@task.Id">Edit</a>
+                                                            @* Delete task form *@
+                                                            <form method="post" asp-action="DeleteTask" asp-controller="Project" onsubmit="return confirm('Are you sure you want to delete this task?')">
+                                                                <input type="hidden" name="taskId" value="@task.Id" />
+                                                                <button type="submit" class="dropdown-item text-danger">Delete</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                <button type="button" class="close ms-3 border rounded shadow-sm" data-dismiss="modal" aria-label="Close">
+                                                    <span aria-hidden="true">&times;</span>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        @* Display task modal *@
+                                        <div class="modal-body">
+                                            @* Status *@
+                                            <div class="d-flex">
+											    <p class="mt-2 me-2"><strong>Status:</strong></p>
+                                                <div id="taskStatusColor-@task.Id" class="@GetStatusBackgroundSquare(task.Status) border me-2 mt-1 mb-3 p-2"></div>
+											    <form id="taskStatus-@task.Id" method="post" asp-action="EditTaskStatus" asp-controller="Project">
+												    <input type="hidden" name="Id" value="@task.Id" />
+                                                    <input type="hidden" name="TaskColumnId" value="@task.TaskColumnId" />
+												    <select name="Status" class="form-select w-auto" onchange="updateTaskStatus(@task.Id); changeStatus(this.value, @task.Id)">
+                                                        <option value="NotStarted" selected="@(task.Status == Limoncello.Models.TaskStatus.NotStarted)">Not Started</option>
+                                                        <option value="InProgress" selected="@(task.Status == Limoncello.Models.TaskStatus.InProgress)">In Progress</option>
+                                                        <option value="Completed" selected="@(task.Status == Limoncello.Models.TaskStatus.Completed)">Completed</option>
+												    </select>
+											    </form>
+                                            </div>
+                                            <script>
+                                                function changeStatus(status, id)
+                                                {
+                                                    let statusCard = document.getElementById("show-status-" + id);
+                                                    let progressBar = document.getElementById("progress-bar-" + id);
+                                                    switch (status) {
+                                                        case "NotStarted":
+                                                            statusCard.style.color = "red";
+                                                            statusCard.innerHTML = "Not Started";
+                                                            progressBar.style.backgroundColor = "red";
+                                                            progressBar.ariaValueNow = 0;
+                                                            progressBar.style.width = "10%";
+                                                            break;
+                                                        case "InProgress":
+                                                            statusCard.style.color = "darkgoldenrod";
+                                                            statusCard.innerHTML = "In Progress";
+                                                            progressBar.style.backgroundColor = "darkgoldenrod";
+                                                            progressBar.ariaValueNow = 50;
+                                                            progressBar.style.width = "50%";
+                                                            break;
+                                                        case "Completed":
+                                                            statusCard.style.color = "green";
+                                                            statusCard.innerHTML = "Completed";
+                                                            progressBar.style.backgroundColor = "green";
+                                                            progressBar.ariaValueNow = 100;
+                                                            progressBar.style.width = "100%";
+                                                            break;
+                                                    }
+                                                }
+                                            </script>
+                                            @* Assigned members *@
+                                            <div class="d-flex justify-content-between">
+                                                <p><strong>Assigned to: </strong></p>
+                                                @if (isOrganizerOrAdmin)
+                                                {
+                                                    <div class="dropdown">
+                                                        <button class="dropdown-toggle btn btn-outline-primary rounded-3 shadow-sm d-flex align-items-center" type="button" id="addUserDropdown" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                            <i class="bi bi-person-plus mb-1"></i><span class="ms-2">Add Partner</span>
+                                                        </button>
+                                                        <div class="dropdown-menu p-4" aria-labelledby="addUserDropdown" style="width: 320px; border-radius: 10px;">
+                                                            <form method="post" asp-action="AddUserToTask" asp-controller="Project">
+                                                                <input type="hidden" name="taskId" value="@task.Id" />
+                                                                <div class="form-group">
+                                                                    <label for="email" class="form-label ms-3">Your partner's email</label>
+                                                                    <input type="email" class="form-control mb-3" name="email" placeholder="" required />
+                                                                </div>
+                                                                <button type="submit" class="btn btn-primary w-100">Add</button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                }
+                                            </div>
+                                            <div class="d-flex">
+                                                @foreach (var userTask in task.UserTasks)
+                                                {
+                                                    var user = userTask.User;
+                                                    var base64String = userTask.User.ProfilePicture != null ? Convert.ToBase64String(user.ProfilePicture) : null;
+                                                    <div class="form-group m-3 dropdown">
+                                                        <img id="profile-picture-@userTask.UserId"
+                                                             class="dropdown-toggle"
+                                                             src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                                                             alt="Profile Picture"
+                                                             style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
+                                                             data-bs-toggle="dropdown"
+                                                             aria-expanded="false" />
+                                                        <ul class="dropdown-menu">
+                                                            <li><span class="dropdown-item-text">@user.FirstName @user.LastName</span></li>
+                                                            @if (isOrganizerOrAdmin)
+                                                            {
+                                                                <li>
+                                                                    <form asp-action="RemoveUserFromTask" asp-controller="Project">
+                                                                        <input type="hidden" name="taskId" value="@userTask.TaskId" />
+                                                                        <input type="hidden" name="userId" value="@userTask.UserId" />
+                                                                        <button type="submit"
+                                                                                class="dropdown-item"
+                                                                                data-toggle="modal"
+                                                                                data-target="#changeOrgModal">
+                                                                            Remove From Task
+                                                                        </button>
+                                                                    </form>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    </div>
+                                                }
+                                            </div>
+                                            @* Start/Due Date *@
+                                            <p><strong>Start Date:</strong> @task.StartDate</p>
+                                            <p><strong>Due Date:</strong> @task.DueDate</p>
+                                            @* Description & Content *@
+                                            <p class="text-wrap text-break w-100">
+                                                <strong>Description:</strong> <br />
+                                                @task.Description
+                                            </p>
+                                            <p class="text-wrap text-break">
+                                                <strong>Content:</strong> 
+                                                <br />
+                                                @UrlHelper.RemoveUrls(task.Content)
+                                                @foreach (var link in UrlHelper.ExtractUrls(task.Content))
+                                                {
+                                                    <partial name="EmbeddedContentPartial" model="link" />
+                                                }
+                                            </p>
+
+                                            <hr />
+                                            @* Comments *@
+                                            <div class="mt-4">
+                                                <h5 class="text-dark">Comments</h5>
+                                                <div class="list-group">
+                                                    @foreach (var comment in task.Comments)
+                                                    {
+                                                        var base64String = comment.User.ProfilePicture != null ? Convert.ToBase64String(comment.User.ProfilePicture) : null;
+                                                        <div class="list-group-item p-3 mb-2 border rounded shadow-sm">
+                                                            <div class="list-group-item p-3 mb-3 border rounded shadow-sm d-flex align-items-start">
+                                                                <img id="profile-picture-@comment.User.Id"
+                                                                     class="dropdown-toggle me-3"
+                                                                     src="@(base64String != null ? $"data:image/png;base64,{base64String}" : "/images/pfp_placeholder.png")"
+                                                                     alt="Profile Picture"
+                                                                     style="width: 50px; height: 50px; border-radius: 50%; cursor: pointer;"
+                                                                     data-bs-toggle="dropdown"
+                                                                     aria-expanded="false" />
+                                                                <div class="flex-grow-1">
+                                                                    <div class="d-flex justify-content-between align-items-center">
+                                                                        <h6 class="mb-1" style="font-weight: bold;">@comment.User.FirstName @comment.User.LastName</h6>
+                                                                        <small class="text-muted">@comment.CreatedDate.ToString("MMMM dd, yyyy HH:mm")</small>
+                                                                    </div>
+                                                                    <p id="comment-content-@comment.Id" class="mt-2 mb-0" style="word-wrap: break-word; overflow-wrap: break-word; white-space: normal; word-break: break-word;">
+                                                                        @comment.Content
+                                                                    </p>
+                                                                    <div id="edit-comment-form-@comment.Id" class="mt-3 d-none">
+                                                                        <form method="post" asp-action="SaveEditedComment" asp-controller="Project">
+                                                                            <input type="hidden" name="id" value="@comment.Id" />
+                                                                            <textarea name="Content" class="form-control" rows="4">@comment.Content</textarea>
+                                                                            <div class="mt-2 d-flex gap-2">
+                                                                                <button type="submit" class="btn btn-custom btn-success btn-sm">Save</button>
+                                                                                <button type="button" class="btn btn-custom btn-danger btn-sm" onclick="cancelEdit(@comment.Id)">Cancel</button>
+                                                                            </div>
+                                                                        </form>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                            @if (ViewBag.UserId == comment.UserId || isAdmin)
+                                                            {
+                                                                <div class="mt-2 text-start d-flex justify-content-end gap-2">
+                                                                    @if (ViewBag.UserId == comment.UserId){
+                                                                        <button type="button" class="btn btn-warning btn-sm" onclick="editComment(@comment.Id)">
+                                                                            <i class="fas fa-edit"></i> Edit
+                                                                        </button>
+                                                                    }
+                                                                    <form method="post" asp-action="RemoveComment" asp-controller="Project" onsubmit="return confirm('Are you sure you want to delete this comment?')">
+                                                                        <input type="hidden" name="commentId" value="@comment.Id" />
+                                                                        <button type="submit" class="btn btn-danger btn-sm">
+                                                                            <i class="fas fa-trash"></i>
+                                                                        </button>
+                                                                    </form>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        <script>    
+                                                            function editComment(commentId) {   
+                                                                document.getElementById(`comment-content-${commentId}`).classList.add('d-none');
+                                                                document.getElementById(`edit-comment-form-${commentId}`).classList.remove('d-none');
+                                                            }
+                                                            function cancelEdit(commentId) { 
+                                                                document.getElementById(`comment-content-${commentId}`).classList.remove('d-none');
+                                                                document.getElementById(`edit-comment-form-${commentId}`).classList.add('d-none');
+                                                            }
+                                                        </script>
+                                                    }
+                                                </div>
+                                            </div>
+                                            <form method="post" asp-action="AddComment" asp-controller="Project" class="mt-4">
+                                                <input type="hidden" name="ProjectTaskId" value="@task.Id" id="projectTaskId" />
+                                                <div class="form-group">
+                                                    <label for="Content" class="font-weight-bold"></label>
+                                                    <textarea id="Content" name="Content" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-custom btn-secondary mt-2">Add Comment</button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @* Edit Task Modal *@
+                            <div class="modal fade" id="editTaskModal-@task.Id" tabindex="-1" role="dialog" aria-labelledby="editTaskModalLabel-@task.Id" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content rounded-3 shadow-lg">
+                                        <!-- Modal Header -->
+                                        <div class="modal-header bg-white text-white">
+                                            <h5 class="modal-title" id="editTaskModalLabel-@task.Id">Edit Task</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <!-- Modal Body -->
+                                        <div class="modal-body">
+                                            <form method="post" asp-action="EditTask" asp-controller="Project">
+                                                <input type="hidden" name="Id" value="@task.Id" />
+                                                <input type="hidden" name="TaskColumnId" value="@task.TaskColumnId" />
+
+                                                <!-- Title Input -->
+                                                <div class="form-group mb-3">
+                                                    <label for="Title" class="form-label">Title</label>
+                                                    <input type="text" class="form-control form-control-lg" name="Title" value="@task.Title" required />
+                                                </div>
+
+                                                <!-- Description Input -->
+                                                <div class="form-group mb-3">
+                                                    <label for="Description" class="form-label">Description</label>
+                                                    <textarea class="form-control form-control-lg" name="Description" rows="3" required>@task.Description</textarea>
+                                                </div>
+
+                                                <!-- Content Input -->
+                                                <div class="form-group mb-3">
+                                                    <label for="Content" class="form-label">Content</label>
+                                                    <textarea class="form-control form-control-lg" name="Content" rows="3" required>@task.Content</textarea>
+                                                </div>
+
+                                                <!-- Start Date Input -->
+                                                <div class="form-group mb-3">
+                                                    <label for="StartDate" class="form-label">Start Date</label>
+                                                    <input type="date" class="form-control form-control-lg" name="StartDate" value="@task.StartDate?.ToString("yyyy-MM-dd")" required />
+                                                </div>
+
+                                                <!-- Due Date Input -->
+                                                <div class="form-group mb-3">
+                                                    <label for="DueDate" class="form-label">Due Date</label>
+                                                    <input type="date" class="form-control form-control-lg" name="DueDate" value="@task.DueDate?.ToString("yyyy-MM-dd")" required />
+                                                </div>
+
+                                                <!-- Save Button -->
+                                                <div class="d-flex justify-content-end">
+                                                    <button type="submit" class="btn btn-custom btn-success px-4 py-2">Save Changes</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    }
+                </div>
+                @if (isOrganizerOrAdmin)
+                {
+                    <div class="">
+                        <button type="button"
+                                data-toggle="modal"
+                                data-target="#addTaskModal"
+                                class="btn btn-custom btn-secondary me-3 d-flex align-items-center"
+                                onclick="updateTaskColIdOnForm(@column.Id)">
+                            <i class="bi bi-plus-circle mb-1"></i> <span class="ms-2">Add Task</span>
+                        </button>
+                    </div>
+                }
             </div>
         }
     </div>
@@ -59,12 +517,62 @@
                 Are you sure you want to leave the board?
             </div>
             <div class="modal-footer flex-column">
-                <button type="button" class="btn btn-danger" onclick="submitLeaveBoardForm()">Leave</button>
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-wide btn-danger" onclick="submitLeaveBoardForm()">Leave</button>
+                <button type="button" class="btn btn-custom btn-secondary" data-dismiss="modal">Cancel</button>
             </div>
         </div>
     </div>
 </div>
+
+@* Create task popup *@
+<div class="modal fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content rounded-3 shadow-lg">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="addTaskModalLabel">Create a new task</h5>
+                <button type="button" class="btn-close" data-dismiss="modal">
+
+                </button>
+            </div>
+            <div class="modal-body">
+                <form method="post" asp-action="AddTask" asp-controller="Project">
+                    <input type="hidden" name="TaskColumnId" value="" id="taskColumnId" />
+                    <div class="form-group mb-4">
+                        <label for="Title" class="font-weight-bold">Title</label>
+                        <input type="text" class="form-control rounded-3 shadow-sm" name="Title" required />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="Description" class="font-weight-bold">Description</label>
+                        <textarea class="form-control rounded-3 shadow-sm" name="Description" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="StartDate" class="font-weight-bold">Start Date</label>
+                        <input type="date" class="form-control rounded-3 shadow-sm" name="StartDate" required />
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="DueDate" class="font-weight-bold">Due Date</label>
+                        <input type="date" class="form-control rounded-3 shadow-sm" name="DueDate" required />
+                    </div>
+                    <button type="submit" class="btn btn-custom btn-secondary rounded-3 shadow-sm w-100 mt-3">Create</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    @if ((TempData["ShowModal"] as bool?) == true)
+    {
+        <text>
+            let modal = new bootstrap.Modal(document.getElementById('taskDetailsModal-' + @(TempData["TaskId"] as int?)));
+            modal.show();
+        </text>
+        TempData["ShowModal"] = false;
+    }
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
 <script>
     function submitLeaveBoardForm(){
@@ -241,6 +749,28 @@
         .catch(error => {
             console.error('There was a problem with the fetch operation:', error);
         });
+    }
+
+    function goBack() {
+        let currentUrl = window.location.href;
+        let previousUrl = document.referrer;
+
+        if (window.history.length > 1) {
+            if (previousUrl && previousUrl !== currentUrl) {
+                window.history.back();
+            } else {
+                let steps = -1;
+                while (steps > -window.history.length && document.referrer === currentUrl) {
+                    window.history.go(steps);
+                    steps--;
+                }
+                if (document.referrer === currentUrl) {
+                    window.location.href = '/';
+                }
+            }
+        } else {
+            window.location.href = '/';
+        }
     }
 </script>
 

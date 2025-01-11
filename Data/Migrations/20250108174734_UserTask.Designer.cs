@@ -4,6 +4,7 @@ using Limoncello.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Limoncello.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250108174734_UserTask")]
+    partial class UserTask
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -176,9 +179,6 @@ namespace Limoncello.Data.Migrations
                     b.Property<DateOnly?>("DueDate")
                         .HasColumnType("date");
 
-                    b.Property<int?>("Index")
-                        .HasColumnType("int");
-
                     b.Property<DateOnly?>("StartDate")
                         .HasColumnType("date");
 
@@ -205,9 +205,6 @@ namespace Limoncello.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("Index")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -403,7 +400,7 @@ namespace Limoncello.Data.Migrations
                         .IsRequired();
 
                     b.HasOne("Limoncello.Models.ApplicationUser", "User")
-                        .WithMany("Comments")
+                        .WithMany()
                         .HasForeignKey("UserId");
 
                     b.Navigation("ProjectTask");
@@ -524,8 +521,6 @@ namespace Limoncello.Data.Migrations
 
             modelBuilder.Entity("Limoncello.Models.ApplicationUser", b =>
                 {
-                    b.Navigation("Comments");
-
                     b.Navigation("UserProjects");
 
                     b.Navigation("UserTasks");

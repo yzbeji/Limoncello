@@ -15,7 +15,8 @@ namespace Limoncello.Data
         public DbSet<UserProject> UserProjects { get; set; }
         public DbSet<ProjectTask> ProjectTasks { get; set; }
         public DbSet<TaskColumn> TaskColumns { get; set; }
-
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<UserTask> UserTasks { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -29,6 +30,17 @@ namespace Limoncello.Data
                 .HasOne(up => up.Project)
                 .WithMany(up => up.UserProjects)
                 .HasForeignKey(up => up.ProjectId);
+
+            builder.Entity<UserTask>()
+                .HasKey(ut => new { ut.UserId, ut.TaskId });
+            builder.Entity<UserTask>()
+                .HasOne(ut => ut.User)
+                .WithMany(ut => ut.UserTasks)
+                .HasForeignKey(ut => ut.UserId);
+            builder.Entity<UserTask>()
+                .HasOne(ut => ut.Task)
+                .WithMany(ut => ut.UserTasks)
+                .HasForeignKey(ut => ut.TaskId);
         }
     }
 }

@@ -26,7 +26,14 @@ a:hover {
   color: #3700b3;  
 }
 
-.btn {
+.list-group-item {
+    max-width: 100%;
+    word-wrap: break-word;
+}
+.ms-10 {
+    margin-left: 16.7rem;
+}
+.btn-custom {
     background-color: #F0F0F0;
     color: #121212;
     font-family: 'Poppins', sans-serif;
@@ -37,14 +44,24 @@ a:hover {
     border-color: black;
 }
 
-.btn:focus {
+.btn-wide {
+    font-family: 'Poppins', sans-serif;
+    font-weight: bold;
+    padding: 8px 100px;
+    width: auto;
+    border: 1px;
+    border-color: black;
+}
+
+.btn-custom:focus {
     outline: none;
     box-shadow: none;
     color: black;
 }
 
-.btn:hover {
+.btn-custom:hover {
     color: black;
+    background-color: lightgrey;
 }
 
 .navbar {
@@ -247,6 +264,24 @@ body {
     text-decoration: none;
     color: inherit;
 }
+
+.cursor-pointer{
+    cursor: pointer;
+}
+
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: block;
+    width: 100%;
+}
+
+.fixed-width-container {
+    max-width: 300px;
+    width: 100%;
+}
+
 
 
 
