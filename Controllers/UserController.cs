@@ -45,6 +45,7 @@ namespace Limoncello.Controllers
 
             ViewBag.AllRoles = GetAllRoles();
             ViewBag.Role = await _userManager.GetRolesAsync(user);
+            ViewBag.Self = id == _userManager.GetUserId(User);
             return View(user);
         }
 
@@ -67,9 +68,14 @@ namespace Limoncello.Controllers
                 }
 
                 user.Email = reqUser.Email;
+                user.UserName = reqUser.Email.ToLower();
+                user.NormalizedUserName = reqUser.Email.ToUpper();
                 user.FirstName = reqUser.FirstName;
                 user.LastName = reqUser.LastName;
                 user.PhoneNumber = reqUser.PhoneNumber;
+                user.Organization = reqUser.Organization;
+                user.Department = reqUser.Department;
+                user.JobTitle = reqUser.JobTitle;
 
                 var roles = db.Roles.ToList();
 
