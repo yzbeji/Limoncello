@@ -695,19 +695,15 @@ namespace Limoncello.Controllers
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Show", new { id = projectId });
             }
-            var isIn = db.UserProjects.FirstOrDefault(up => up.UserId == user.Id && up.ProjectId == projectId);
-            if (isIn == null)
+
+            var isInBoard = db.UserProjects.FirstOrDefault(up => up.UserId == user.Id && up.ProjectId == projectId);
+            if (isInBoard == null)
             {
                 TempData["message"] = "Please add member first in board";
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Settings", new { id = projectId });
             }
-            else if (isIn != null)
-            {
-                TempData["message"] = "Member added succesfully";
-                TempData["messageType"] = "alert-succes";
-                return RedirectToAction("Settings", new { id = projectId });
-            }
+
             string userId = user.Id;
 
             var userTask = new UserTask
