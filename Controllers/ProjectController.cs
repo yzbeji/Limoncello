@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Server.HttpSys;
 using Microsoft.Build.Execution;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -860,7 +861,6 @@ namespace Limoncello.Controllers
             var user = _userManager.FindByIdAsync(userId).Result;
             return _userManager.IsInRoleAsync(user, "Admin").Result;
         }
-
         private bool isOrganizerOrAdmin(int? projectId, bool showMessage = true)
         {
             if (projectId == null)
@@ -874,7 +874,7 @@ namespace Limoncello.Controllers
             {
                 return false;
             }
-            var isOrganizer = userId == project.OrganizerId || isAdmin(userId);
+            var isOrganizer = (userId == project.OrganizerId) || isAdmin(userId);
 
             if (isOrganizer == false && showMessage == true)
             {

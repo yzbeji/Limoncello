@@ -128,6 +128,7 @@
                                     <div class="modal-body">
                                         <form method="post" asp-action="EditTaskColumn" asp-controller="Project">
                                             <input type="hidden" name="Id" value="@column.Id" />
+                                            <input type="hidden" name="ProjectId" value="@column.ProjectId">
                                             <div class="form-group mb-3">
                                                 <label for="Name" class="form-label">New column name</label>
                                                 <input type="text" class="form-control form-control-lg" name="Name" value="@column.Name" required />
