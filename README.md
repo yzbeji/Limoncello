@@ -17,3 +17,11 @@ Limoncello is a task management and collaboration tool, inspired by Trello, buil
 - **Frontend**: Bootstrap
 - **Database**: SQL Server
 - **Authentication**: ASP.NET Identity
+
+## Photos
+
+![image](https://github.com/user-attachments/assets/583aa0d3-4a25-419d-b1de-cdbf3bfa4633)
+![image](https://github.com/user-attachments/assets/ae0545ae-89c5-4246-9a2b-50152130810b)
+![image](https://github.com/user-attachments/assets/55394057-50db-4736-88e5-46be55fb6b44)
+![image](https://github.com/user-attachments/assets/328542ec-13bd-4609-88c6-73b6259a39fd)
+
