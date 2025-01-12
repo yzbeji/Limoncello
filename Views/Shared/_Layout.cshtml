@@ -14,7 +14,7 @@
     <header>
         <nav class="navbar navbar-expand-lg grey-nav">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Project" asp-action="Index">
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
                     <img id="pnglogo" src="/images/navbar_logo.webp" />
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
@@ -28,8 +28,8 @@
                         </li>
                         @if (User.IsInRole("Admin"))
                         {
-                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users Pannel</a>
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="ProjectsPannel">Projects Pannel</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users Panel</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="ProjectsPanel">Projects Panel</a>
                         }
                     </ul>
                     <partial name="_LoginPartial" />
