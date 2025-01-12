@@ -10,19 +10,32 @@
 </head>
 @if (TempData["message"] != null)
 {
-    <div class="alert @TempData["messageType"] alert-dismissible fade show" role="alert">
+    <div class="alert @TempData["messageType"] alert-dismissible fade show alert-fixed" role="alert">
         @TempData["message"]
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
     <script>
         setTimeout(function () {
             var alert = document.querySelector('.alert');
             if (alert) {
                 alert.classList.add('fade-out');
-                setTimeout(() => {
-                    alert.remove();
-                }, 2000);
             }
-        }, 1000);
+        }, 3000);
     </script>
+    <style>
+        .alert-fixed {
+            position: fixed;
+            left: 20%;
+            transform: translate(-50%, -50%);
+            z-index: 1050;
+            width: 1000px;
+        }
 
+        .fade-out {
+            opacity: 0;
+            transition: opacity 3s ease-out;
+        }
+    </style>
 }
