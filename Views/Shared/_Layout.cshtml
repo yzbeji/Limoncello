@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="~/Limoncello.styles.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.3.0/font/bootstrap-icons.css">
-
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-lg grey-nav">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Project" asp-action="Index"><img id="pnglogo" src="/images/navbar_logo.webp"/></a>
+                <a class="navbar-brand" asp-area="" asp-controller="Project" asp-action="Index">
+                    <img id="pnglogo" src="/images/navbar_logo.webp" />
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -25,7 +26,8 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="Index">Projects</a>
                         </li>
-                        @if (User.IsInRole("Admin")){
+                        @if (User.IsInRole("Admin"))
+                        {
                             <a class="nav-link text-dark" asp-area="" asp-controller="User" asp-action="Index">Users Pannel</a>
                             <a class="nav-link text-dark" asp-area="" asp-controller="Project" asp-action="ProjectsPannel">Projects Pannel</a>
                         }
@@ -36,7 +38,7 @@
         </nav>
     </header>
     <div class="container">
-        <main role="main" class="pb-3">
+        <main role="main">
             @RenderBody()
         </main>
     </div>
