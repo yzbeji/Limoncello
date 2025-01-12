@@ -152,3 +152,9 @@ function updateDueDateMin() {
     var dueDateInput = document.getElementById("DueDate");
     dueDateInput.min = startDate;
 }
+
+function updateDueDateMinEdit(taskId) {
+    var startDate = document.getElementById("StartDateEditForm-" + taskId).value;
+    var dueDateInput = document.getElementById("DueDateEditForm-" + taskId);
+    dueDateInput.min = startDate;
+}

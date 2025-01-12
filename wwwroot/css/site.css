@@ -3,6 +3,10 @@ html {
   background-color: white;
   color: #121212;
   font-family: 'Poppins', sans-serif;
+  max-height: calc(100vh);
+
+  scrollbar-width: thin;
+  scrollbar-color: darkgrey transparent
 }
 
 @media (min-width: 768px) {
@@ -282,6 +286,35 @@ body {
     width: 100%;
 }
 
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: darkgrey transparent;
+}
+
+/*Scrollbar improvements*/
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    flex-shrink: 0;
+}
 
 
+main {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-x: auto;
+    overflow-y: auto;
+    box-sizing: border-box;
+}
 
+.container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+}
