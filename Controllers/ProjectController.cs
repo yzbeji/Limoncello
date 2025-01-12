@@ -489,7 +489,7 @@ namespace Limoncello.Controllers
             {
                 taskCol.Name = reqTaskColumn.Name;
                 db.SaveChanges();
-
+                
                 TempData["message"] = "Column edited successfully!";
                 TempData["messageType"] = "alert-success";
                 return RedirectToAction("Show", new { id = taskCol.ProjectId });
@@ -694,6 +694,19 @@ namespace Limoncello.Controllers
                 TempData["message"] = "User does not exist!";
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Show", new { id = projectId });
+            }
+            var isIn = db.UserProjects.FirstOrDefault(up => up.UserId == user.Id && up.ProjectId == projectId);
+            if (isIn == null)
+            {
+                TempData["message"] = "Please add member first in board";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Settings", new { id = projectId });
+            }
+            else if (isIn != null)
+            {
+                TempData["message"] = "Member added succesfully";
+                TempData["messageType"] = "alert-succes";
+                return RedirectToAction("Settings", new { id = projectId });
             }
             string userId = user.Id;
 
