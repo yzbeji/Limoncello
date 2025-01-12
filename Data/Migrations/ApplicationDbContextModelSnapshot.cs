@@ -134,7 +134,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Comments");
+                    b.ToTable("Comments", (string)null);
                 });
 
             modelBuilder.Entity("Limoncello.Models.Project", b =>
@@ -157,7 +157,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Projects");
+                    b.ToTable("Projects", (string)null);
                 });
 
             modelBuilder.Entity("Limoncello.Models.ProjectTask", b =>
@@ -202,7 +202,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("TaskColumnId");
 
-                    b.ToTable("ProjectTasks");
+                    b.ToTable("ProjectTasks", (string)null);
                 });
 
             modelBuilder.Entity("Limoncello.Models.TaskColumn", b =>
@@ -227,7 +227,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("ProjectId");
 
-                    b.ToTable("TaskColumns");
+                    b.ToTable("TaskColumns", (string)null);
                 });
 
             modelBuilder.Entity("Limoncello.Models.UserProject", b =>
@@ -247,7 +247,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("UserProjects");
+                    b.ToTable("UserProjects", (string)null);
                 });
 
             modelBuilder.Entity("Limoncello.Models.UserTask", b =>
@@ -262,7 +262,7 @@ namespace Limoncello.Data.Migrations
 
                     b.HasIndex("TaskId");
 
-                    b.ToTable("UserTasks");
+                    b.ToTable("UserTasks", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
