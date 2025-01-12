@@ -45,12 +45,20 @@ namespace Limoncello.Controllers
 
             ViewBag.AllRoles = GetAllRoles();
             ViewBag.Role = await _userManager.GetRolesAsync(user);
+            ViewBag.Self = id == _userManager.GetUserId(User);
             return View(user);
         }
 
         [HttpPost]
         public async Task<ActionResult> Edit([FromForm] ApplicationUser reqUser, [FromForm] string reqRole)
         {
+            if (reqUser.Id == _userManager.GetUserId(User))
+            {
+                TempData["message"] = "You can't edit yourself!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = reqUser.Id });
+            }
+
             if (ModelState.IsValid)
             {
                 var user = await _userManager.FindByIdAsync(reqUser.Id);
@@ -60,9 +68,14 @@ namespace Limoncello.Controllers
                 }
 
                 user.Email = reqUser.Email;
+                user.UserName = reqUser.Email.ToLower();
+                user.NormalizedUserName = reqUser.Email.ToUpper();
                 user.FirstName = reqUser.FirstName;
                 user.LastName = reqUser.LastName;
                 user.PhoneNumber = reqUser.PhoneNumber;
+                user.Organization = reqUser.Organization;
+                user.Department = reqUser.Department;
+                user.JobTitle = reqUser.JobTitle;
 
                 var roles = db.Roles.ToList();
 
@@ -94,6 +107,13 @@ namespace Limoncello.Controllers
         [HttpPost]
         public IActionResult Delete(string id)
         {
+            if (id == _userManager.GetUserId(User))
+            {
+                TempData["message"] = "You can't delete yourself!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = id });
+            }
+
             var user = db.Users
                          .Include("Comments")
                          .Where(u => u.Id == id)

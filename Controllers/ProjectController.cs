@@ -30,6 +30,8 @@ namespace Limoncello.Controllers
         public int oldIndex { get; set; }
         public int newIndex { get; set; }
     }
+
+    [Authorize(Roles = "User,Admin")]
     public class ProjectController : Controller
     {
         private readonly ApplicationDbContext db;
@@ -46,7 +48,6 @@ namespace Limoncello.Controllers
             _roleManager = roleManager;
         }
 
-        [Authorize(Roles = "User,Admin")]
         public IActionResult Index()
         {
             string userId = _userManager.GetUserId(User);
@@ -67,7 +68,6 @@ namespace Limoncello.Controllers
             return View();
         }
 
-        [Authorize(Roles = "User,Admin")]
         public IActionResult Show(int? id)
         {
             if (!isAdmin(_userManager.GetUserId(User)) && !isMember(id))
@@ -95,7 +95,6 @@ namespace Limoncello.Controllers
             return View(project);
         }
         
-        [Authorize(Roles = "User,Admin")]
         public IActionResult Settings(int? id)
         {
             if (!isOrganizerOrAdmin(id))
@@ -126,7 +125,6 @@ namespace Limoncello.Controllers
             return View(project);
         }
 
-        [Authorize(Roles = "User,Admin")]
         public IActionResult New(Project project)
         {
             project.OrganizerId = _userManager.GetUserId(User);
@@ -152,8 +150,7 @@ namespace Limoncello.Controllers
                 return RedirectToAction("Index");
             }
         }
-
-        [Authorize(Roles = "User,Admin")]
+        
         [HttpPost]
         public IActionResult SaveEditedComment([FromForm]int id, [FromForm]string? content)
         {
@@ -178,7 +175,6 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId });
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditProject(Project reqProject)
         {
@@ -204,7 +200,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddMemberToProject(int projectId, string userEmail)
         {
@@ -258,8 +253,7 @@ namespace Limoncello.Controllers
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Settings", new { id = projectId });
         }
-
-        [Authorize(Roles = "User,Admin")]
+        
         [HttpPost]
         public IActionResult RemoveMember(int projectId, string userId)
         {
@@ -293,8 +287,7 @@ namespace Limoncello.Controllers
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Settings", new { id = projectId });
         }
-
-        [Authorize(Roles = "User,Admin")]
+        
         [HttpPost]
         public IActionResult LeaveBoard(int projectId)
         {
@@ -320,8 +313,7 @@ namespace Limoncello.Controllers
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Index");
         }
-
-        [Authorize(Roles = "User,Admin")]
+        
         [HttpPost]
         public IActionResult Delete(int projectId)
         {
@@ -347,7 +339,6 @@ namespace Limoncello.Controllers
             return RedirectToAction("Index");
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult MakeOrganizer(int projectId, string userId)
         {
@@ -374,8 +365,7 @@ namespace Limoncello.Controllers
             var action = isAdmin(_userManager.GetUserId(User)) ? "Settings" : "Show";
             return RedirectToAction(action, new { id = projectId });
         }
-
-        [Authorize(Roles = "User,Admin")]
+        
         [HttpPost]
         public IActionResult AddComment(Comment comment)
         {
@@ -409,7 +399,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult RemoveComment([FromForm] int commentId) 
         {
@@ -444,7 +433,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddTaskColumn([FromForm] TaskColumn reqTaskColumn)
         {
@@ -472,7 +460,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditTaskColumn([FromForm] TaskColumn reqTaskColumn)
         {
@@ -502,7 +489,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult DeleteTaskColumn(int columnId)
         {
@@ -527,7 +513,6 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = taskCol.ProjectId });
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult UpdateTaskColumnDisplayInfo([FromBody] UpdateTaskColumnDisplayInfoRequest req)
         {
@@ -565,8 +550,7 @@ namespace Limoncello.Controllers
 
             return Json(new { success = true, message = "Column moved successfully!" });
         }
-
-        [Authorize(Roles = "User,Admin")]
+        
         [HttpPost]
         public IActionResult AddTask([FromForm] ProjectTask reqTask)
         {
@@ -601,7 +585,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditTask([FromForm] ProjectTask reqTask)
         {
@@ -640,7 +623,6 @@ namespace Limoncello.Controllers
             }
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult EditTaskStatus([FromForm] ProjectTask reqTask)
         {
@@ -673,7 +655,6 @@ namespace Limoncello.Controllers
             return Json(new { success = true, message = "Task status updated!" });
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult AddUserToTask(int taskId, string email)
         {
@@ -720,7 +701,6 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId });
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult RemoveUserFromTask(int taskId, string userId)
         {
@@ -753,7 +733,6 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId });
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult DeleteTask(int taskId)
         {
@@ -783,7 +762,6 @@ namespace Limoncello.Controllers
             return RedirectToAction("Show", new { id = projectId});
         }
 
-        [Authorize(Roles = "User,Admin")]
         [HttpPost]
         public IActionResult UpdateTaskDisplayInfo([FromBody] UpdateTaskDisplayInfoRequest req)
         {
@@ -844,7 +822,7 @@ namespace Limoncello.Controllers
         }
 
         [Authorize(Roles = "Admin")]
-        public IActionResult ProjectsPannel()
+        public IActionResult ProjectsPanel()
         {
             var projects = db.Projects.ToList();
             if (projects == null)
